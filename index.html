@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FutureSkills360° – Quiz (AuA Demo)</title>
+  <meta name="description" content="FutureSkills360° – Demo-Quiz für Ausbilder:innen/Ausbildungskoordinator:innen (AuA). Antworten werden nur in dieser Sitzung gespeichert." />
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js" defer></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #111111;
+      --muted: #444444;
+      --primary: #0b63b6; /* ausreichend Kontrast auf weiß */
+      --accent: #0e8a16;
+      --focus: #ffab00;
+      --border: #d0d7de;
+      --error: #b00020;
+      font-size: 16px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 1.25rem;
+    }
+    header {
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.75rem;
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin: 0 0 0.25rem;
+    }
+    p.lead {
+      margin: 0.25rem 0 0.5rem 0;
+      color: var(--muted);
+    }
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+    }
+    button, .btn {
+      appearance: none;
+      border: 2px solid var(--primary);
+      background: var(--primary);
+      color: #fff;
+      padding: 0.6rem 0.9rem;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button.secondary, .btn.secondary {
+      background: transparent;
+      color: var(--primary);
+    }
+    button:focus, .btn:focus, input:focus {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+    .hidden { display: none !important; }
+    .err {
+      color: var(--error);
+      margin-top: 0.5rem;
+    }
+    fieldset {
+      border: none;
+      padding: 0;
+      margin: 0;
+    }
+    legend {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.6rem 0.75rem;
+      margin: 0.45rem 0;
+    }
+    .option:hover {
+      background: #f6f8fa;
+    }
+    .muted { color: var(--muted); }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    @media (min-width: 800px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      padding: 0.5rem;
+    }
+    .sr-only {
+      position: absolute !important;
+      height: 1px; width: 1px;
+      overflow: hidden;
+      clip: rect(1px,1px,1px,1px);
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="main">
+    <header>
+      <h1 id="title">FutureSkills360° – AuA Quiz (Demo)</h1>
+      <p class="lead">Zielgruppe: Ausbilder:innen/Ausbildungskoordinator:innen (AuA). Antworten werden ausschließlich in dieser Sitzung gespeichert.</p>
+    </header>
+
+    <section id="intro" class="card" aria-labelledby="intro-h">
+      <h2 id="intro-h">Kurz erklärt</h2>
+      <p>Sie sehen gleich 2 beispielhafte Szenarien. Wählen Sie jeweils eine Option aus. Am Ende erhalten Sie eine visuelle Auswertung (Sunburst) sowie eine tabellarische Übersicht. Diese Demo speichert keine Daten dauerhaft.</p>
+      <div class="actions">
+        <button id="startBtn" aria-describedby="start-hint">Quiz starten</button>
+        <p id="start-hint" class="sr-only">Startet das Quiz mit der ersten Frage.</p>
+      </div>
+    </section>
+
+    <section id="quiz" class="card hidden" aria-live="polite">
+      <div id="progress" class="muted" aria-atomic="true"></div>
+      <form id="qForm" novalidate>
+        <fieldset>
+          <legend id="qText">Fragetext</legend>
+          <div id="options"></div>
+        </fieldset>
+      </form>
+      <div id="error" class="err" role="alert" aria-live="assertive"></div>
+      <div class="actions">
+        <button id="prevBtn" class="secondary" type="button">Zurück</button>
+        <button id="nextBtn" type="button">Weiter</button>
+      </div>
+    </section>
+
+    <section id="results" class="card hidden" aria-labelledby="res-h">
+      <h2 id="res-h">Ihre Auswertung</h2>
+      <div class="grid-2">
+        <div>
+          <div id="chart" role="img" aria-label="Sunburst-Diagramm der Future Skills"></div>
+          <div class="actions">
+            <button id="copyBtn" type="button" class="secondary">Kurzreport kopieren</button>
+            <button id="resetBtn" type="button">Zurücksetzen</button>
+          </div>
+        </div>
+        <div>
+          <h3>Textuelle Übersicht (barrierefrei)</h3>
+          <p class="muted">Tabellarische Auflistung aller 26 Skills mit Ihren Punktwerten. Die Summe je Kategorie wird im Diagramm dargestellt.</p>
+          <div id="tableWrap"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // ======================
+    // KONFIGURATION & DATEN
+    // ======================
+
+    // Kategorien -> Skills (maschinenlesbare Keys, keine Leerzeichen, ae/oe/ue statt Umlauten)
+    const CATEGORIES = {
+      "Technologische_Kompetenzen": [
+        "KI_Datenkompetenz",
+        "Softwareentwicklung",
+        "Nutzerzentriertes_Design",
+        "Digitale_Infrastruktur_und_Cybersicherheit",
+        "Hardware_Robotikentwicklung",
+        "Prompt_Engineering"
+      ],
+      "Digitale_Schluesselkompetenzen": [
+        "Digital_Literacy",
+        "Digitale_Ethik_und_KI_Governance",
+        "Digitale_Kollaboration",
+        "KI_gestuetztes_Lernen_und_Weiterbildung",
+        "Datenmanagement"
+      ],
+      "Klassische_Kompetenzen": [
+        "Unternehmerisches_Denken_und_Innovationsgeist",
+        "Eigenverantwortung_und_Selbstwirksamkeit",
+        "Agilitaet",
+        "Loesungsfaehigkeit",
+        "Kreativitaet",
+        "Interkulturelle_Kommunikation",
+        "Resilienz",
+        "Freundlichkeit",
+        "Selbstbewusstsein",
+        "Werteorientiertes_Handeln",
+        "Weltoffenheit"
+      ],
+      "Transformative_Kompetenzen": [
+        "Urteilsfaehigkeit",
+        "Innovationskompetenz",
+        "Veraenderungskompetenz",
+        "Dialog_und_Konfliktfaehigkeit"
+      ]
+    };
+
+    // Leserliche Anzeigenamen je Skill
+    const SKILL_LABELS = {
+      "KI_Datenkompetenz": "KI-Datenkompetenz",
+      "Softwareentwicklung": "Softwareentwicklung",
+      "Nutzerzentriertes_Design": "Nutzerzentriertes Design",
+      "Digitale_Infrastruktur_und_Cybersicherheit": "Digitale Infrastruktur & Cybersicherheit",
+      "Hardware_Robotikentwicklung": "Hardware-/Robotikentwicklung",
+      "Prompt_Engineering": "Prompt Engineering",
+      "Digital_Literacy": "Digital Literacy",
+      "Digitale_Ethik_und_KI_Governance": "Digitale Ethik & KI-Governance",
+      "Digitale_Kollaboration": "Digitale Kollaboration",
+      "KI_gestuetztes_Lernen_und_Weiterbildung": "KI-gestütztes Lernen & Weiterbildung",
+      "Datenmanagement": "Datenmanagement",
+      "Unternehmerisches_Denken_und_Innovationsgeist": "Unternehmerisches Denken & Innovationsgeist",
+      "Eigenverantwortung_und_Selbstbewusstsein": "Eigenverantwortung & Selbstbewusstsein", // fallback mapping if needed
+      "Eigenverantwortung_und_Selbstwirksamkeit": "Eigenverantwortung & Selbstwirksamkeit",
+      "Agilitaet": "Agilität",
+      "Loesungsfaehigkeit": "Lösungsfähigkeit",
+      "Kreativitaet": "Kreativität",
+      "Interkulturelle_Kommunikation": "Interkulturelle Kommunikation",
+      "Resilienz": "Resilienz",
+      "Freundlichkeit": "Freundlichkeit (Kindness)",
+      "Selbstbewusstsein": "Selbstbewusstsein",
+      "Werteorientiertes_Handeln": "Werteorientiertes Handeln",
+      "Weltoffenheit": "Weltoffenheit",
+      "Urteilsfaehigkeit": "Urteilsfähigkeit",
+      "Innovationskompetenz": "Innovationskompetenz",
+      "Veraenderungskompetenz": "Veränderungskompetenz",
+      "Dialog_und_Konfliktfaehigkeit": "Dialog- & Konfliktfähigkeit"
+    };
+
+    // DEMO-Szenarien (2 Beispiele). Jede Antwort mappt exakt auf einen Skill.
+    // Die Ausweichoption hat skill:null (wird nicht gewertet).
+    const SCENARIOS = [
+      {
+        id: "AUA_1",
+        text: "Sie begleiten eine:n neue:n Auszubildende:n, der/die Schwierigkeiten hat, digitale Tools im Alltag zu nutzen. Was tun Sie zuerst?",
+        options: [
+          { id: "A", label: "Eine kurze Bedarfsanalyse durchführen und ein passendes Lernpfad-Konzept mit konkreten Micro-Lerneinheiten skizzieren.", skill: "KI_gestuetztes_Lernen_und_Weiterbildung", weight: 1 },
+          { id: "B", label: "Ein strukturiertes Starter-Set mit klaren Standards für Dateiablage, Benennungen und Rechtevergabe bereitstellen.", skill: "Datenmanagement", weight: 1 },
+          { id: "C", label: "Ein Peer-Tandem mit einem erfahrenen Azubi aufsetzen und klare Kollaborationsregeln vereinbaren.", skill: "Digitale_Kollaboration", weight: 1 },
+          { id: "D", label: "Nichts davon passt für meine Situation.", skill: null, weight: 0 }
+        ]
+      },
+      {
+        id: "AUA_2",
+        text: "Ihr Bereich testet ein KI-gestütztes Tool. Wie gehen Sie mit Datenschutz- und Fairness-Fragen um?",
+        options: [
+          { id: "A", label: "Richtlinien und Use-Case-Grenzen definieren, Bias-Risiken prüfen und transparent kommunizieren.", skill: "Digitale_Ethik_und_KI_Governance", weight: 2 },
+          { id: "B", label: "Technische Zugriffsrollen und Netzwerksicherheit mit IT abstimmen, Log-Protokolle aktivieren.", skill: "Digitale_Infrastruktur_und_Cybersicherheit", weight: 1 },
+          { id: "C", label: "Mitarbeitende schulen, wie Prompts und Datenquellen korrekt genutzt und dokumentiert werden.", skill: "Prompt_Engineering", weight: 1 },
+          { id: "D", label: "Nichts davon passt für meine Situation.", skill: null, weight: 0 }
+        ]
+      }
+    ];
+
+    // Initiale Scores für alle 26 Skills
+    const allSkills = Object.values(CATEGORIES).flat();
+    const initialScores = allSkills.reduce((acc, k) => { acc[k] = 0; return acc; }, {});
+
+    // ======================
+    // STATE & HILFSFUNKTIONEN
+    // ======================
+
+    const STORAGE_KEY = "fs360_scores_aua";
+    const STORAGE_QIDX = "fs360_qidx_aua";
+
+    function loadState() {
+      try {
+        const raw = sessionStorage.getItem(STORAGE_KEY);
+        const qraw = sessionStorage.getItem(STORAGE_QIDX);
+        const scores = raw ? JSON.parse(raw) : { ...initialScores };
+        const idx = qraw ? parseInt(qraw, 10) : 0;
+        return { scores, idx };
+      } catch(e) {
+        return { scores: { ...initialScores }, idx: 0 };
+      }
+    }
+
+    function saveState(scores, idx) {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(scores));
+      sessionStorage.setItem(STORAGE_QIDX, String(idx));
+    }
+
+    function resetState() {
+      sessionStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem(STORAGE_QIDX);
+    }
+
+    function currentScenario(idx) {
+      return SCENARIOS[idx];
+    }
+
+    function formatSkillLabel(key) {
+      return SKILL_LABELS[key] || key.replaceAll("_"," ");
+    }
+
+    // ======================
+    // RENDER QUIZ
+    // ======================
+
+    const introEl = document.getElementById("intro");
+    const quizEl = document.getElementById("quiz");
+    const resEl = document.getElementById("results");
+    const qTextEl = document.getElementById("qText");
+    const optionsEl = document.getElementById("options");
+    const progressEl = document.getElementById("progress");
+    const errEl = document.getElementById("error");
+    const startBtn = document.getElementById("startBtn");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const copyBtn = document.getElementById("copyBtn");
+
+    let state = loadState();
+
+    function show(el) { el.classList.remove("hidden"); }
+    function hide(el) { el.classList.add("hidden"); }
+
+    function renderQuestion() {
+      const idx = state.idx;
+      const total = SCENARIOS.length;
+      const sc = currentScenario(idx);
+
+      progressEl.textContent = `Frage ${idx + 1} von ${total}`;
+      qTextEl.textContent = sc.text;
+      optionsEl.innerHTML = "";
+      errEl.textContent = "";
+
+      sc.options.forEach((opt, i) => {
+        const id = `q${idx}_opt${i}`;
+        const wrap = document.createElement("label");
+        wrap.className = "option";
+        wrap.setAttribute("for", id);
+
+        const input = document.createElement("input");
+        input.type = "radio";
+        input.name = `q${idx}`;
+        input.id = id;
+        input.value = opt.id;
+        input.dataset.skill = opt.skill || "";
+        input.dataset.weight = String(opt.weight || 0);
+        input.setAttribute("aria-label", opt.label);
+        input.style.marginTop = "0.15rem";
+
+        const span = document.createElement("span");
+        span.textContent = opt.label;
+
+        wrap.appendChild(input);
+        wrap.appendChild(span);
+        optionsEl.appendChild(wrap);
+      });
+
+      prevBtn.disabled = idx === 0;
+      nextBtn.textContent = idx === total - 1 ? "Auswertung anzeigen" : "Weiter";
+    }
+
+    function applyAnswerAndNext() {
+      const idx = state.idx;
+      const sc = currentScenario(idx);
+      const selected = document.querySelector(`input[name="q${idx}"]:checked`);
+      if (!selected) {
+        errEl.textContent = "Bitte wählen Sie eine Option aus.";
+        return;
+      }
+      errEl.textContent = "";
+
+      const skill = selected.dataset.skill || null;
+      const weight = parseInt(selected.dataset.weight || "0", 10);
+
+      const scores = state.scores;
+      if (skill && scores.hasOwnCaseSensitive ? scores.hasOwnCaseSensitive(skill) : scores.hasOwnProperty(skill)) {
+        scores[skill] += weight;
+      }
+      saveState(scores, idx + 1);
+
+      if (idx + 1 < SCENARIOS.length) {
+        state.idx += 1;
+        renderQuestion();
+      } else {
+        renderResults();
+      }
+    }
+
+    function goPrev() {
+      if (state.idx > 0) {
+        state.idx -= 1;
+        saveState(state.scores, state.idx);
+        renderQuestion();
+      }
+    }
+
+    function renderResults() {
+      hide(introEl);
+      hide(quizEl);
+      show(resEl);
+
+      // Aggregation für Sunburst
+      const scores = state.scores;
+      const labels = [];
+      const parents = [];
+      const values = [];
+
+      // Root node (optional for Plotly's sunburst)
+      // We'll omit explicit root to keep it clean.
+
+      Object.keys(CATEGORIES).forEach(cat => {
+        const skills = CATEGORIES[cat];
+        const catSum = skills.reduce((sum, sk) => sum + (scores[sk] || 0), 0);
+        if (catSum > 0) {
+          labels.push(cat.replaceAll("_"," "));
+          parents.push("");
+          values.push(catSum);
+        }
+        skills.forEach(sk => {
+          const v = scores[sk] || 0;
+          if (v > 0) {
+            labels.push(formatSkillLabel(sk));
+            parents.push(cat.replaceAll("_"," "));
+            values.push(v);
+          }
+        });
+      });
+
+      // Fallback: wenn noch alles 0 ist, eine kleine Dummy-Scheibe anzeigen,
+      // damit Nutzer:innen trotzdem etwas sehen.
+      if (values.length === 0) {
+        labels.push("Keine Antworten");
+        parents.push("");
+        values.push(1);
+      }
+
+      const data = [{
+        type: "sunburst",
+        labels, parents, values,
+        branchvalues: "total",
+        hovertemplate: "%{label}: %{value}<extra></extra>",
+        insidetextorientation: "radial"
+      }];
+
+      const layout = {
+        margin: { l: 0, r: 0, t: 0, b: 0 }
+      };
+      Plotly.newPlot("chart", data, layout, {displayModeBar: false, responsive: true});
+
+      // Tabelle rendern (alle Skills, auch 0)
+      const tableWrap = document.getElementById("tableWrap");
+      const rows = Object.values(CATEGORIES).flat().map(sk => {
+        return `<tr><td>${formatSkillLabel(sk)}</td><td>${scores[sk] || 0}</td></tr>`;
+      }).join("");
+      tableWrap.innerHTML = `
+        <table aria-describedby="res-h">
+          <thead>
+            <tr><th>Skill</th><th>Punkte</th></tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function copyReport() {
+      const scores = state.scores;
+      let text = "FutureSkills360° – Kurzreport (AuA Demo)\n\n";
+      Object.keys(CATEGORIES).forEach(cat => {
+        text += `# ${cat.replaceAll("_"," ")}\n`;
+        CATEGORIES[cat].forEach(sk => {
+          text += `- ${formatSkillLabel(sk)}: ${scores[sk] || 0}\n`;
+        });
+        text += "\n";
+      });
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Kurzreport in die Zwischenablage kopiert.");
+      }).catch(() => {
+        alert("Kopieren nicht möglich. Bitte manuell markieren und kopieren.");
+      });
+    }
+
+    // ======================
+    // EVENTS
+    // ======================
+
+    startBtn.addEventListener("click", () => {
+      hide(introEl);
+      show(quizEl);
+      renderQuestion();
+    });
+    nextBtn.addEventListener("click", applyAnswerAndNext);
+    prevBtn.addEventListener("click", goPrev);
+    resetBtn.addEventListener("click", () => {
+      resetState();
+      state = loadState();
+      hide(resEl);
+      show(introEl);
+      document.getElementById("title").focus?.();
+    });
+    copyBtn.addEventListener("click", copyReport);
+  </script>
+</body>
+</html>
