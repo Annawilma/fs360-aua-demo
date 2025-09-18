@@ -16,7 +16,38 @@
   <script src="https://cdn.plot.ly/plotly-2.32.0.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
-  <style>
+  /* === FS360 Hintergrund-Fix (bitte direkt VOR </style> einsetzen) === */
+:root{
+  /* Sofort sichtbare Startbilder: */
+  --page-bg: linear-gradient(0deg, rgba(35,75,89,0.12), rgba(35,75,89,0.12)), url("bg-body-1.webp");
+  --hero-bg:  linear-gradient(0deg, rgba(35,75,89,0.12), rgba(35,75,89,0.12)), url("bg-hero-1.webp");
+  /* Deckkraft (bei Bedarf anpassen): */
+  --page-bg-opacity: .12;
+  --hero-bg-opacity: .28;
+}
+
+/* Seitenhintergrund sichtbar machen */
+body{ position: relative; }
+body::before{
+  content:""; position: fixed; inset:0; z-index:0; /* <— wichtig: 0 statt -1 */
+  pointer-events:none;
+  background-image: var(--page-bg);
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+  opacity: var(--page-bg-opacity);
+}
+
+/* Header-Hintergrund sichtbar machen */
+.hero{ position: sticky; top:0; z-index:5; overflow:hidden; }
+.hero::before{
+  content:""; position:absolute; inset:0; z-index:0;
+  pointer-events:none;
+  background-image: var(--hero-bg);
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+  opacity: var(--hero-bg-opacity);
+  mix-blend-mode: multiply;
+}
+.hero .container{ position: relative; z-index: 1; }
+<style>
     :root {
       --bg:#f7fafc; --panel:#ffffff; --fg:#0f1720; --muted:#5c6b74;
       --primary:#234b59; --primary-weak:#e7eff2; --primary-grad:#2f6677;
@@ -473,5 +504,6 @@ document.getElementById("pdfBtn").addEventListener("click", async ()=>{ try{ con
   doc.save("FutureSkills360_AuA_Ergebnis.pdf"); }catch(err){ alert("PDF-Export nicht möglich: " + (err?.message || err)); } });
 document.addEventListener('DOMContentLoaded', function(){ try{ setBgFromIndex(0); }catch(e){} }); 
 </script>
+<script>document.addEventListener('DOMContentLoaded',()=>{ try{ setBgFromIndex(0); }catch(e){} });</script>
 </body>
 </html>
