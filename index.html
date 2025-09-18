@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
+  <!--
+    Optionaler Hintergrund (einfach machen):
+    - Lade zwei Bilder in dieselbe Ordner-Ebene wie index.html:
+        bg-body.jpg   (groß, z.B. 2400x1600, subtil)
+        bg-hero.jpg   (breit, z.B. 2000x800, darf „stimmungsvoll“ sein)
+    - Das Stylesheet unten ist schon vorbereitet. Sobald die Dateien vorhanden sind,
+      werden sie automatisch genutzt. Passe bei Bedarf die Opazitäten an.
+  -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FutureSkills360° - Ausbilder:innen, Ausbildungspersonal und Personalverantwortiche</title>
@@ -15,6 +23,11 @@
       --focus:#ffb703; --border:#d0d7de; --error:#b00020;
       --shadow:0 10px 20px rgba(0,0,0,.06), 0 3px 8px rgba(0,0,0,.04);
       --radius:16px;
+    
+      --hero-bg: none;          /* z.B. url("bg-hero.jpg") */
+      --page-bg: none;          /* z.B. url("bg-body.jpg") */
+      --hero-bg-opacity: .28;   /* 0–1: Deckkraft im Header */
+      --page-bg-opacity: .12;   /* 0–1: Deckkraft im Seitenhintergrund */
     }
     * { box-sizing:border-box; }
     html,body { height:100%; }
@@ -83,6 +96,17 @@
 
     .pause{ display:flex; gap:.6rem; flex-wrap:wrap; }
   </style>
+
+  <style>
+    /* Wenn du Bilder hochlädst, kannst du die folgenden Zeilen aktivieren/ändern: */
+    :root{
+      /* Beispiele (Dateien neben index.html ablegen):
+         --page-bg: url("bg-body.jpg");
+         --hero-bg: url("bg-hero.jpg");
+      */
+    }
+  </style>
+
 </head>
 <body>
   <div class="hero">
@@ -95,12 +119,8 @@
   <main class="shell" role="main">
     <section id="intro" class="card" aria-labelledby="intro-h">
       <h2 id="intro-h" style="margin:.2rem 0 .4rem; font-size:1.2rem;">Kurz erklärt</h2>
-      <p>Sie bearbeiten <strong id="countScenarios"></strong> kurze <strong>Szenarien</strong>. Nutzen Sie gern den <strong>Schnellmodus</strong>: Eine Taste (1–4) wählt und wechselt automatisch zum nächsten Szenario.</p>
+      <p>Sie bearbeiten <strong id="countScenarios"></strong> kurze <strong>Szenarien</strong>. Tipp: Mit den Tasten <strong>1–4</strong> wählen Sie eine Antwort.</p>
       <div class="toprow">
-        <div class="chip">
-          <input type="checkbox" id="quickToggle" aria-describedby="quickDesc" style="margin:0;" />
-          <label for="quickToggle"><strong style="margin-left:.35rem;">Schnellmodus</strong></label>
-        </div>
         <span class="chip" id="estTime"></span>
       </div>
       <div class="actions">
@@ -156,6 +176,40 @@
   </main>
 
 <script>
+
+// ====== Hintergrund-Rotation (optional) ======
+// Liste deiner Seitenhintergründe (beliebig viele möglich)
+const BG_IMAGES_PAGE = ["bg-body-1.webp", "bg-body-2.webp", "bg-body-3.webp", "bg-body-4.webp", "bg-body-5.webp", "bg-body-6.webp", "bg-body-7.webp", "bg-body-8.webp", "bg-body-9.webp"];
+// Liste deiner Hero-Hintergründe
+const BG_IMAGES_HERO = ["bg-hero-1.webp", "bg-hero-2.webp", "bg-hero-3.webp", "bg-hero-4.webp", "bg-hero-5.webp", "bg-hero-6.webp", "bg-hero-7.webp", "bg-hero-8.webp", "bg-hero-9.webp"];
+
+let _bgTimer = null;
+const TIMED_ROTATION = false;   // auf true setzen für automatischen Wechsel
+const ROTATE_MS = 12000;        // Intervall in ms
+const BLUE_OVERLAY = "linear-gradient(0deg, rgba(35,75,89,0.12), rgba(35,75,89,0.12))";
+
+function setBgFromIndex(i){
+  const root = document.documentElement;
+  const p = (BG_IMAGES_PAGE && BG_IMAGES_PAGE.length) ? `, url("${BG_IMAGES_PAGE[i % BG_IMAGES_PAGE.length]}")` : "";
+  const h = (BG_IMAGES_HERO && BG_IMAGES_HERO.length) ? `, url("${BG_IMAGES_HERO[i % BG_IMAGES_HERO.length]}")` : "";
+  root.style.setProperty('--page-bg', `${BLUE_OVERLAY}${p}`);
+  root.style.setProperty('--hero-bg', `${BLUE_OVERLAY}${h}`);
+}
+
+function startTimedRotation(){
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce || !TIMED_ROTATION) return;
+  let i = 0;
+  clearInterval(_bgTimer);
+  _bgTimer = setInterval(()=>{ i++; setBgFromIndex(i); }, ROTATE_MS);
+}
+function stopTimedRotation(){ clearInterval(_bgTimer); _bgTimer = null; }
+
+// Preload der ersten Bilder für schnellere Darstellung
+(function preloadBg(){
+  [...(BG_IMAGES_PAGE||[]).slice(0,2), ...(BG_IMAGES_HERO||[]).slice(0,2)].forEach(src => { const img = new Image(); img.src = src; });
+})();
+
 const CATEGORIES = {
   "Technologische_Kompetenzen": [
     "KI_Datenkompetenz","Softwareentwicklung","Nutzerzentriertes_Design","Digitale_Infrastruktur_und_Cybersicherheit","Hardware_Robotikentwicklung","Prompt_Engineering"
@@ -267,6 +321,7 @@ function renderQuestion(){
   const idx = state.idx;
   const sc = SCENARIOS[idx];
   updateProgress();
+  try{ setBgFromIndex(state.idx || 0); }catch(e){}
   qTextEl.textContent = sc.text;
   optionsEl.innerHTML = "";
   errEl.textContent = "";
@@ -340,6 +395,7 @@ function goPrev(){
 
 function renderResults(){
   hide(introEl); hide(quizEl); hide(breakEl); show(resEl);
+  try{ setBgFromIndex(SCENARIOS.length || 0); }catch(e){}
 
   const scores = state.scores;
   const labels = []; const parents = []; const values = [];
@@ -391,12 +447,12 @@ document.addEventListener("keydown",(e)=>{
 });
 
 // Events
-document.getElementById("startBtn").addEventListener("click", ()=>{ 
+document.getElementById("startBtn").addEventListener("click", ()=>{ try{ setBgFromIndex(state.idx||0); startTimedRotation(); }catch(e){} 
   hide(introEl); show(quizEl); 
   if (countScenarios) countScenarios.textContent = SCENARIOS.length;
   renderQuestion(); 
 });
-document.getElementById("skipToResults").addEventListener("click", ()=>{ renderResults(); });
+document.getElementById("skipToResults").addEventListener("click", ()=>{ try{ setBgFromIndex(SCENARIOS.length||0); }catch(e){} renderResults(); });
 document.getElementById("nextBtn").addEventListener("click", applyAnswerAndNext);
 document.getElementById("prevBtn").addEventListener("click", goPrev);
 document.getElementById("breakNextBtn").addEventListener("click", ()=>{ hide(breakEl); show(quizEl); renderQuestion(); });
