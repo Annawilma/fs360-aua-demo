@@ -180,7 +180,46 @@
 
 <script>
 /* ===== Kategorien & Labels ===== */
-const CATEGORIES = {
+/* ===== Hintergrund-Rotation (nutzt deine 1–9 .webp-Dateien) ===== */
+const BG_IMAGES_PAGE = [
+  "bg-body-1.webp","bg-body-2.webp","bg-body-3.webp","bg-body-4.webp","bg-body-5.webp",
+  "bg-body-6.webp","bg-body-7.webp","bg-body-8.webp","bg-body-9.webp"
+];
+const BG_IMAGES_HERO = [
+  "bg-hero-1.webp","bg-hero-2.webp","bg-hero-3.webp","bg-hero-4.webp","bg-hero-5.webp",
+  "bg-hero-6.webp","bg-hero-7.webp","bg-hero-8.webp","bg-hero-9.webp"
+];
+
+// setzt die CSS-Variablen auf Bild Nr. i
+function setBgFromIndex(i){
+  const root = document.documentElement;
+  const p = BG_IMAGES_PAGE[i % BG_IMAGES_PAGE.length];
+  const h = BG_IMAGES_HERO[i % BG_IMAGES_HERO.length];
+  root.style.setProperty('--page-bg', `url("${p}")`);
+  root.style.setProperty('--hero-bg', `url("${h}")`);
+  // falls Deckkraft zu niedrig / hoch, hier anpassen:
+  root.style.setProperty('--page-bg-opacity', '.28'); // 0..1
+  root.style.setProperty('--hero-bg-opacity', '.55'); // 0..1
+}
+
+// automatische Rotation (alle X Sekunden). Auf Wunsch auf "false" stellen.
+const TIMED_ROTATION = false;
+const ROTATE_EVERY_SECONDS = 10;
+let __bgTimer = null;
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  try{
+    setBgFromIndex(0); // Startbild
+    if(TIMED_ROTATION){
+      let idx = 1;
+      __bgTimer = setInterval(()=>{
+        setBgFromIndex(idx++);
+      }, ROTATE_EVERY_SECONDS*1000);
+    }
+  }catch(e){}
+});
+
+  const CATEGORIES = {
   "Technologische_Kompetenzen": [
     "KI_Datenkompetenz","Softwareentwicklung","Nutzerzentriertes_Design","Digitale_Infrastruktur_und_Cybersicherheit","Hardware_Robotikentwicklung","Prompt_Engineering"
   ],
@@ -277,6 +316,9 @@ function renderQuestion(){
   const idx=state.idx;
   const sc=SCENARIOS[idx];
   updateProgress();
+  // Hintergrund passend zur Frage wechseln
+try{ setBgFromIndex(state.idx); }catch(e){}
+
   qTextEl.textContent = sc?.text || "Keine Szenarien gefunden.";
   optionsEl.innerHTML=""; errEl.textContent="";
 
@@ -428,6 +470,33 @@ document.getElementById("pdfBtn").addEventListener("click", async ()=>{
     doc.save("FutureSkills360_AuA_Ergebnis.pdf");
   }catch(err){
     alert("PDF-Export nicht möglich: " + (err?.message || err));
+  }
+});
+  /* ===== Tastaturkürzel: 1–4 wählen, Enter = weiter, Backspace = zurück ===== */
+document.addEventListener('keydown', (ev)=>{
+  const inQuiz = !document.getElementById('quiz').classList.contains('hidden');
+  if(!inQuiz) return;
+
+  // 1–4 -> Option wählen
+  if(ev.key >= '1' && ev.key <= '4'){
+    const n = parseInt(ev.key, 10) - 1; // 0..3
+    const radios = document.querySelectorAll(`input[name="q${state.idx}"]`);
+    if(radios[n]){
+      radios[n].checked = true;
+      ev.preventDefault();
+    }
+  }
+
+  // Enter -> Weiter
+  if(ev.key === 'Enter'){
+    document.getElementById('nextBtn').click();
+    ev.preventDefault();
+  }
+
+  // Backspace -> Zurück (aber NICHT im Eingabefeld stören)
+  if(ev.key === 'Backspace' && ev.target.tagName !== 'INPUT' && ev.target.tagName !== 'TEXTAREA' && !ev.target.isContentEditable){
+    document.getElementById('prevBtn').click();
+    ev.preventDefault();
   }
 });
 </script>
