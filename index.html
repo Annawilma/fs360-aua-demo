@@ -14,6 +14,10 @@
   <style>
     :root{
       --bg:#f7fafc; --panel:#ffffff; --fg:#0f1720; --muted:#5c6b74;
+      --cat-tech:#234B59;
+      --cat-digi:#93B7BE;
+      --cat-classic:#F5C396;
+      --cat-trans:#78290F;
       --primary:#234b59; --primary-weak:#e7eff2; --primary-grad:#2f6677;
       --focus:#ffb703; --border:#d0d7de; --error:#b00020;
       --shadow:0 10px 20px rgba(0,0,0,.06), 0 3px 8px rgba(0,0,0,.04);
@@ -103,9 +107,10 @@
 
     /* Dezentes Bild im Ergebnisbereich */
     #results{ position:relative; overflow:hidden; }
-   #results::before{
+  #results::before{
+  content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
   background: url("IDW_201222_0902_1920.webp") center/cover no-repeat;
-  opacity:.10;
+  opacity:.10; /* bei Bedarf .07–.14 anpassen */
 }
     }
     #results > *{ position:relative; z-index:1; }
@@ -375,16 +380,16 @@ function renderResults(){
   });
   if(values.length===0){ labels.push("Keine Antworten"); parents.push(""); values.push(1); }
 
-  const cPrimary = getCssVar('--primary') || '#234b59';
-  const cGrad    = getCssVar('--primary-grad') || '#2f6677';
-  const cMuted   = getCssVar('--muted') || '#5c6b74';
-  const cFocus   = getCssVar('--focus') || '#ffb703';
+const cTech    = getCssVar('--cat-tech')    || '#234B59';
+const cDigi    = getCssVar('--cat-digi')    || '#93B7BE';
+const cClassic = getCssVar('--cat-classic') || '#F5C396';
+const cTrans   = getCssVar('--cat-trans')   || '#78290F';
 
-  const catColorMap = new Map([
-    ["Technologische Kompetenzen", cPrimary],
-    ["Digitale Schluesselkompetenzen", cGrad],
-    ["Klassische Kompetenzen", cMuted],
-    ["Transformative Kompetenzen", cFocus]
+const catColorMap = new Map([
+  ["Technologische Kompetenzen", cTech],
+  ["Digitale Schluesselkompetenzen", cDigi],
+  ["Klassische Kompetenzen", cClassic],
+  ["Transformative Kompetenzen", cTrans]
   ]);
 
   const colors = labels.map((lbl, i) => {
