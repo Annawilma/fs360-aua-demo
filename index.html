@@ -106,15 +106,30 @@
     .toprow{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.8rem;flex-wrap:wrap}
 
     /* Dezentes Bild im Ergebnisbereich */
-    #results{ position:relative; overflow:hidden; }
-  #results::before{
-  content:""; position:absolute; inset:0; z-index:0; pointer-events:none;
-  background: url("IDW_201222_0902_1920.webp") center/cover no-repeat;
-  opacity:.10; /* bei Bedarf .07–.14 anpassen */
+    /* Ergebnisbereich mit dezentem Hintergrundbild */
+#results{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate; /* eigener Stacking-Context */
 }
-    }
-    #results > *{ position:relative; z-index:1; }
-  </style>
+#results::before{
+  content:"";
+  position:absolute; inset:0;
+  pointer-events:none; z-index:0;
+
+  /* Erst WebP, dann JPG als Fallback */
+  background-image:
+    url("IDW_201222_0902_1920.webp"),
+    url("IDW_201222_0902.jpg");
+  background-size: cover;
+  background-position: center 35%; /* bei Bedarf anpassen (0–100%) */
+  background-repeat: no-repeat;
+
+  opacity:.18; /* Sichtbarkeit: 0.12 (dezenter) – 0.24 (kräftiger) */
+}
+/* Inhalt über dem Bild */
+#results > *{ position:relative; z-index:1; }
+</style>
 </head>
 <body>
   <div class="hero">
