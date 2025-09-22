@@ -107,6 +107,13 @@
 
     /* Dezentes Bild im Ergebnisbereich */
     /* Ergebnisbereich mit dezentem Hintergrundbild */
+    /* bessere Lesbarkeit der Skillnamen in der Tabelle */
+#tableWrap table td:first-child{
+  hyphens:auto;           /* Silbentrennung (Sprache ist schon lang="de") */
+  overflow-wrap: anywhere;/* bricht lange Wörter */
+  word-break: normal;
+  max-width: 0;           /* erlaubt Zeilenumbruch in flexiblen Tabellen */
+}
 #results{
   position:relative;
   overflow:hidden;
@@ -283,6 +290,47 @@ function resetState(){
   sessionStorage.removeItem(STORAGE_QIDX);
 }
 function formatSkillLabel(key){ return SKILL_LABELS[key] || key.replaceAll("_"," "); }
+  // weiche Silbentrennung für deutsche Komposita (wirkt v.a. in Tabelle/PDF)
+function softHyphenate(str){
+  const SHY = "\u00AD"; // &shy;
+  return str
+    .replace(/Interkulturelle/g, "Inter"+SHY+"kulturelle")
+    .replace(/Kommunikation/g, "Kommu"+SHY+"nikation")
+    .replace(/Werteorientiertes/g, "Werte"+SHY+"orientiertes")
+    .replace(/Eigenverantwortung/g, "Eigen"+SHY+"verantwortung")
+    .replace(/Selbstwirksamkeit/g, "Selbst"+SHY+"wirksamkeit")
+    .replace(/Innovationskompetenz/g, "Innovations"+SHY+"kompetenz")
+    .replace(/Veränderungskompetenz/g, "Ver"+SHY+"änderungs"+SHY+"kompetenz")
+    .replace(/Lösungsfähigkeit|Lösungsfähigkeit/g, "Lösungs"+SHY+"fähigkeit")
+    .replace(/Urteilsfähigkeit/g, "Urteils"+SHY+"fähigkeit")
+    .replace(/Cybersicherheit/g, "Cyber"+SHY+"sicherheit")
+    .replace(/Nutzerzentriertes/g, "Nutzer"+SHY+"zentriertes")
+    .replace(/Robotikentwicklung/g, "Robotik"+SHY+"entwicklung")
+    .replace(/KI-gestütztes/g, "KI-gestütztes")
+    .replace(/KI-Datenkompetenz/g, "KI-Daten"+SHY+"kompetenz")
+    .replace(/Weltoffenheit/g, "Welt"+SHY+"offenheit");
+}
+
+// bricht lange Sunburst-Labels in 2 Zeilen (fügt <br> ein)
+function wrapForSunburst(label){
+  const clean = label.replace(/\s+/g," ").trim();
+
+  // bevorzugte Bruchstellen rund um „ & “, „ / “, „-“ usw.
+  const preferred = [" & ", " - ", " / "];
+  for (const sep of preferred){
+    const i = clean.indexOf(sep);
+    if (i > 0 && clean.length > 18){
+      return clean.slice(0, i).trim() + "<br>" + clean.slice(i).trim();
+    }
+  }
+  // generisch: nach ~22 Zeichen am letzten Leerzeichen umbrechen
+  const limit = 22;
+  if (clean.length > limit){
+    const cut = clean.lastIndexOf(" ", limit);
+    if (cut > 0) return clean.slice(0, cut) + "<br>" + clean.slice(cut+1);
+  }
+  return clean;
+}
 function percent(n,d){ return d? Math.round((n/d)*100) : 0; }
 
 /* ===== DOM ===== */
@@ -385,14 +433,26 @@ function renderResults(){
   try{ setBgFromIndex(SCENARIOS.length||0); }catch(e){}
   const scores=state.scores;
 
-  const labels=[], parents=[], values=[];
-  Object.keys(CATEGORIES).forEach(cat=>{
-    const pretty = cat.replaceAll("_"," ");
-    const skills=CATEGORIES[cat];
-    const catSum=skills.reduce((sum,sk)=>sum+(scores[sk]||0),0);
-    if(catSum>0){ labels.push(pretty); parents.push(""); values.push(catSum); }
-    skills.forEach(sk=>{ const v=scores[sk]||0; if(v>0){ labels.push(formatSkillLabel(sk)); parents.push(pretty); values.push(v); } });
+const labels=[], parents=[], values=[];
+Object.keys(CATEGORIES).forEach(cat=>{
+  const pretty = cat.replaceAll("_"," ");
+  const skills = CATEGORIES[cat];
+  const catSum = skills.reduce((sum,sk)=>sum+(scores[sk]||0),0);
+
+  // Kategorie-Label im Diagramm umbrechen
+  if(catSum>0){ labels.push(wrapForSunburst(pretty)); parents.push(""); values.push(catSum); }
+
+  // Skill-Label: in der Grafik umbrochen, in der Tabelle weich getrennt (kommt später)
+  skills.forEach(sk=>{
+    const v = scores[sk]||0;
+    if(v>0){
+      const chartLabel = wrapForSunburst(SKILL_LABELS[sk] || sk.replaceAll("_"," "));
+      labels.push(chartLabel);
+      parents.push(wrapForSunburst(pretty));
+      values.push(v);
+    }
   });
+});
   if(values.length===0){ labels.push("Keine Antworten"); parents.push(""); values.push(1); }
 
 const cTech    = getCssVar('--cat-tech')    || '#234B59';
