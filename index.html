@@ -14,10 +14,6 @@
   <style>
     :root{
       --bg:#f7fafc; --panel:#ffffff; --fg:#0f1720; --muted:#5c6b74;
-      --cat-tech:#234B59;
-      --cat-digi:#93B7BE;
-      --cat-classic:#F5C396;
-      --cat-trans:#78290F;
       --primary:#234b59; --primary-weak:#e7eff2; --primary-grad:#2f6677;
       --focus:#ffb703; --border:#d0d7de; --error:#b00020;
       --shadow:0 10px 20px rgba(0,0,0,.06), 0 3px 8px rgba(0,0,0,.04);
@@ -25,6 +21,12 @@
 
       /* Seitenhintergrund (wird per JS zwischen 9 Bildern rotiert) */
       --page-bg-image: url("bg-body-1.webp");
+
+      /* Markenfarben für die 4 Kategorien der Auswertung */
+      --cat-tech:#234B59;     /* Technologische Kompetenzen */
+      --cat-digi:#93B7BE;     /* Digitale Schlüsselkompetenzen */
+      --cat-classic:#F5C396;  /* Klassische Kompetenzen */
+      --cat-trans:#78290F;    /* Transformative Kompetenzen */
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -39,7 +41,7 @@
       line-height:1.6;
       position:relative;
     }
-    /* EIN Seitenhintergrundbild, wird gedimmt */
+    /* EIN Seitenhintergrundbild, gedimmt; rotiert per JS */
     body::before{
       content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
       background-image: var(--page-bg-image);
@@ -105,38 +107,37 @@
 
     .toprow{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.8rem;flex-wrap:wrap}
 
-    /* Dezentes Bild im Ergebnisbereich */
     /* Ergebnisbereich mit dezentem Hintergrundbild */
-    /* bessere Lesbarkeit der Skillnamen in der Tabelle */
-#tableWrap table td:first-child{
-  hyphens:auto;           /* Silbentrennung (Sprache ist schon lang="de") */
-  overflow-wrap: anywhere;/* bricht lange Wörter */
-  word-break: normal;
-  max-width: 0;           /* erlaubt Zeilenumbruch in flexiblen Tabellen */
-}
-#results{
-  position:relative;
-  overflow:hidden;
-  isolation:isolate; /* eigener Stacking-Context */
-}
-#results::before{
-  content:"";
-  position:absolute; inset:0;
-  pointer-events:none; z-index:0;
+    #results{
+      position:relative;
+      overflow:hidden;
+      isolation:isolate; /* eigener Stacking-Context */
+    }
+    #results::before{
+      content:"";
+      position:absolute; inset:0;
+      pointer-events:none; z-index:0;
 
-  /* Erst WebP, dann JPG als Fallback */
-  background-image:
-    url("IDW_201222_0902_1920.webp"),
-    url("IDW_201222_0902.jpg");
-  background-size: cover;
-  background-position: center 35%; /* bei Bedarf anpassen (0–100%) */
-  background-repeat: no-repeat;
+      /* Erst WebP, dann JPG als Fallback */
+      background-image:
+        url("IDW_201222_0902_1920.webp"),
+        url("IDW_201222_0902.jpg");
+      background-size: cover;
+      background-position: center 35%;
+      background-repeat: no-repeat;
 
-  opacity:.18; /* Sichtbarkeit: 0.12 (dezenter) – 0.24 (kräftiger) */
-}
-/* Inhalt über dem Bild */
-#results > *{ position:relative; z-index:1; }
-</style>
+      opacity:.14; /* 0.12–0.24 nach Geschmack */
+    }
+    #results > *{ position:relative; z-index:1; }
+
+    /* bessere Lesbarkeit der Skillnamen in der Tabelle (wirkt auch im PDF-Screenshot) */
+    #tableWrap table td:first-child{
+      hyphens:auto;           /* Silbentrennung (lang="de") */
+      overflow-wrap:anywhere; /* bricht lange Wörter */
+      word-break:normal;
+      max-width:0;
+    }
+  </style>
 </head>
 <body>
   <div class="hero">
@@ -206,7 +207,7 @@
   </main>
 
 <script>
-/* ===== Rotierender Seitenhintergrund (9 Bilder) ===== */
+/* ===== Rotierender Seitenhintergrund (9 Bilder, nur Body) ===== */
 const BG_IMAGES_PAGE = [
   "bg-body-1.webp","bg-body-2.webp","bg-body-3.webp","bg-body-4.webp","bg-body-5.webp",
   "bg-body-6.webp","bg-body-7.webp","bg-body-8.webp","bg-body-9.webp"
@@ -262,8 +263,8 @@ const SKILL_LABELS = {
   "Dialog_und_Konfliktfaehigkeit":"Dialog- & Konfliktfähigkeit"
 };
 
-/* ===== Szenarien (dein Block) ===== */
-const SCENARIOS = [{"id": "AUA_1", "text": "Ein:e Azubi:ne kommt nach der Berufsschule in die Werkstatt und wirkt völlig demotiviert.", "options": [{"id": "A", "label": "Ich nehme mir kurz Zeit, frage konkret nach, was in der Schule passiert ist, und höre zu. Danach gebe ich eine kleine, sichtbare Aufgabe: z. B. die Werkzeugkiste für den nächsten Tag herrichten. Am Ende lobe ich die Arbeit – so erlebt der/die Azubi:ne trotz Frust ein Erfolgserlebnis.", "skills": [{"key": "Resilienz", "weight": 1}]}, {"id": "B", "label": "Ich übertrage eine konkrete Aufgabe mit Verantwortung, z. B. die Materialbestellung für ein Projekt. Wenn der/die Azubi:ne merkt, dass es nur an ihm/ihr hing und funktioniert hat, stärkt das sein/ihr Selbstvertrauen.", "skills": [{"key": "Eigenverantwortung_und_Selbstwirksamkeit", "weight": 1}]}, {"id": "C", "label": "Ich mache daraus ein Spiel: „Wer baut den stabilsten Werkzeugständer aus Restmaterialien?“ Am Ende präsentiere ich den Entwurf vor der Gruppe und lobe ihn/sie – so fühlt sich der/die Azubi:ne eingebunden.", "skills": [{"key": "Kreativitaet", "weight": 1}, {"key": "Freundlichkeit", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_2", "text": "Im Betrieb wird ein neues digitales Planungstool eingeführt. Einige Azubis sind unsicher.", "options": [{"id": "A", "label": "Ich setze die Azubis an den Rechner und lasse sie sofort eine Aufgabe eintragen: „Tragt bitte eure Berufsschultage der nächsten Woche ein.“ So üben sie im direkten Tun.", "skills": [{"key": "Digital_Literacy", "weight": 1}]}, {"id": "B", "label": "Ich bilde Tandems (ein erfahrener und ein unsicherer Azubi:ne). Gemeinsam erstellen sie den Schichtplan und stellen ihn im Team vor. So lernen sie digitale Abstimmung und Verantwortung.", "skills": [{"key": "Digitale_Kollaboration", "weight": 1}]}, {"id": "C", "label": "Vor dem Start frage ich: „Was passiert, wenn jemand sein Passwort weitergibt?“ Dann erkläre ich mit einem echten Beispiel, dass ein falscher Eintrag im Betrieb große Folgen haben kann.", "skills": [{"key": "Digitale_Ethik_und_KI_Governance", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_3", "text": "Zwei Azubis geraten über die Arbeitsaufteilung in Streit.", "options": [{"id": "A", "label": "Ich hole beide aus der Werkstatt, lasse jede:n nacheinander erklären und leite die Frage ein: „Wie würdet ihr es lösen, wenn ihr die Entscheidung für die Gruppe trefft?“ So entwickeln sie meist selbst eine Lösung.", "skills": [{"key": "Dialog_und_Konfliktfaehigkeit", "weight": 1}]}, {"id": "B", "label": "Ich erinnere beide daran, dass Teamarbeit heißt, sich gegenseitig zu unterstützen. Dann fordere ich sie auf, dem/der anderen etwas Positives zu nennen, das er/sie gut gemacht hat.", "skills": [{"key": "Freundlichkeit", "weight": 1}]}, {"id": "C", "label": "Wenn es keine Einigung gibt, treffe ich die Entscheidung, erkläre sie aber klar: „Du übernimmst die Schweißarbeiten, weil du das Werkzeug am besten beherrschst, und du führst die Doku, weil du darin schneller bist.“ So bleibt es fair.", "skills": [{"key": "Urteilsfaehigkeit", "weight": 1}, {"key": "Werteorientiertes_Handeln", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_4", "text": "In der Werkstatt wird ein neuer Robotik-Prototyp getestet. Die Azubis haben bisher kaum Erfahrung.", "options": [{"id": "A", "label": "Ich zeige die Grundfunktionen am Prototyp, erkläre Sensoren und Motorik und lasse die Azubis einfache Handgriffe testen.", "skills": [{"key": "Hardware_Robotikentwicklung", "weight": 1}]}, {"id": "B", "label": "Wir lesen die Bewegungsdaten und Fehlerprotokolle des Roboters aus. Ich erkläre, wie diese mit KI-Systemen ausgewertet werden, um Muster oder Störungen zu erkennen.", "skills": [{"key": "KI_Datenkompetenz", "weight": 1}]}, {"id": "C", "label": "Ich gebe die Aufgabe: „Überlegt euch spontan drei Einsatzmöglichkeiten für den Roboter.“ Eine Gruppe denkt an den Transport von Werkstücken, eine an Sicherheitsprüfungen. Danach skizzieren sie ihre Ideen.", "skills": [{"key": "Agilitaet", "weight": 1}, {"key": "Kreativitaet", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_5", "text": "Ein:e Azubi:ne hat Schwierigkeiten, Aufgaben rechtzeitig abzugeben.", "options": [{"id": "A", "label": "Ich teile die Aufgabe in Teilschritte und lasse den/die Azubi:ne selbst die Termine in den Kalender eintragen. Nach jeder Abgabe reflektieren wir, was gut lief.", "skills": [{"key": "Eigenverantwortung_und_Selbstwirksamkeit", "weight": 1}]}, {"id": "B", "label": "Wir simulieren eine Störung: Ein neuer Auftrag kommt rein. Der/die Azubi:ne muss seine/ihre Reihenfolge umstellen und erklären, wie er/sie trotzdem fristgerecht abgibt.", "skills": [{"key": "Agilitaet", "weight": 1}, {"key": "Loesungsfaehigkeit", "weight": 1}]}, {"id": "C", "label": "Wenn er/sie trotz Planung scheitert, bespreche ich: „Was hat dich aufgehalten?“ Dann entwickeln wir Gegenstrategien, z. B. Pausen besser planen oder rechtzeitig Hilfe holen. So lernt er/sie, Rückschläge wegzustecken.", "skills": [{"key": "Resilienz", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_6", "text": "Die Azubis sollen erstmals ein Projekt eigenständig planen.", "options": [{"id": "A", "label": "Ich lasse sie ein Konzept erarbeiten, Kosten kalkulieren und anschließend im Team präsentieren. So üben sie, unternehmerisch zu denken.", "skills": [{"key": "Unternehmerisches_Denken_und_Innovationsgeist", "weight": 1}]}, {"id": "B", "label": "Sie nutzen ein digitales Whiteboard, sammeln Ideen mit Post-its und stimmen sich im Team über die Plattform ab. Dadurch lernen sie kreative Methoden in digitaler Zusammenarbeit kennen.", "skills": [{"key": "Kreativitaet", "weight": 1}, {"key": "Digitale_Kollaboration", "weight": 1}]}, {"id": "C", "label": "Am Ende besprechen wir die Vorschläge systematisch: Was ist machbar, was zu teuer, was bringt den größten Nutzen? So lernen sie, Entscheidungen nachvollziehbar zu begründen.", "skills": [{"key": "Urteilsfaehigkeit", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_7", "text": "Ein:e Azubi:ne ist sehr still und beteiligt sich kaum an Diskussionen.", "options": [{"id": "A", "label": "Ich gebe ihm/ihr den Auftrag, beim nächsten Meeting einen kleinen Fortschritt zu präsentieren. Nach und nach bekommt er/sie so die Sicherheit, vor anderen zu sprechen.", "skills": [{"key": "Selbstbewusstsein", "weight": 1}]}, {"id": "B", "label": "Ich sorge dafür, dass das Team ihn/sie nicht unterbricht, und betone, dass Respekt und Wertschätzung unsere Arbeitskultur prägen.", "skills": [{"key": "Freundlichkeit", "weight": 1}, {"key": "Werteorientiertes_Handeln", "weight": 1}]}, {"id": "C", "label": "Falls Unsicherheit durch kulturelle Unterschiede entsteht, spreche ich das offen an und unterstütze ihn/sie, die eigene Perspektive einzubringen.", "skills": [{"key": "Interkulturelle_Kommunikation", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_8", "text": "Die Azubis sollen ein digitales Projektboard nutzen, um ihre Arbeit zu organisieren.", "options": [{"id": "A", "label": "Jede Gruppe trägt ihre Aufgaben ein und markiert den Fortschritt. Am Ende der Woche sehen alle, wie weit die Teams sind.", "skills": [{"key": "Digitale_Kollaboration", "weight": 1}]}, {"id": "B", "label": "Wir legen klare Regeln fest: Dateinamen, Versionen und Zuständigkeiten. So bleibt die Übersicht erhalten.", "skills": [{"key": "Datenmanagement", "weight": 1}]}, {"id": "C", "label": "Ich erkläre, wie Filter und Benachrichtigungen funktionieren, und lasse sie in einer Übung spontan Aufgaben verschieben, wenn Prioritäten sich ändern.", "skills": [{"key": "Digital_Literacy", "weight": 1}, {"key": "Agilitaet", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_9", "text": "Ein:e Azubi:ne bringt eine ungewöhnliche Idee zur Verbesserung eines Arbeitsablaufs ein.", "options": [{"id": "A", "label": "Ich gebe Raum, die Idee mit einem kleinen Modell oder Ablaufplan zu skizzieren und dem Team vorzustellen.", "skills": [{"key": "Kreativitaet", "weight": 1}]}, {"id": "B", "label": "Gemeinsam prüfen wir, ob die Idee praktikabel ist, und bewerten Kosten, Nutzen und Zeitaufwand.", "skills": [{"key": "Innovationskompetenz", "weight": 1}, {"key": "Urteilsfaehigkeit", "weight": 1}]}, {"id": "C", "label": "Ich motiviere das Team, die Idee in einem Testlauf auszuprobieren, auch wenn sie ungewohnt ist.", "skills": [{"key": "Veraenderungskompetenz", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_10", "text": "Im Online-Unterricht sind mehrere Azubis unkonzentriert und mit dem Handy beschäftigt.", "options": [{"id": "A", "label": "Ich zeige, wie KI-Tools wie Quiz-Apps oder automatische Zusammenfassungen helfen können, den Stoff zu wiederholen.", "skills": [{"key": "KI_gestuetztes_Lernen_und_Weiterbildung", "weight": 1}]}, {"id": "B", "label": "Wir üben, wie man seriöse Informationen im Netz findet und Quellen überprüft.", "skills": [{"key": "Digital_Literacy", "weight": 1}]}, {"id": "C", "label": "Ich fordere die Azubis auf, ihre Lernzeit selbst einzuteilen, und bespreche, wie man auch bei Langeweile oder Schwierigkeiten am Ball bleibt.", "skills": [{"key": "Eigenverantwortung_und_Selbstwirksamkeit", "weight": 1}, {"key": "Resilienz", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_12", "text": "Ein Azubi wirkt überfordert, weil er mehrere Aufgaben parallel erledigen soll.", "options": [{"id": "A", "label": "Wir teilen die Aufgaben auf, erstellen eine Prioritätenliste und vereinbaren klare Reihenfolgen.", "skills": [{"key": "Loesungsfaehigkeit", "weight": 1}]}, {"id": "B", "label": "Ich simuliere mit ihm eine Änderung im Ablaufplan: plötzlich hat ein Auftrag Vorrang. Er lernt, flexibel umzustellen und trotzdem dranzubleiben.", "skills": [{"key": "Agilitaet", "weight": 1}, {"key": "Resilienz", "weight": 1}]}, {"id": "C", "label": "Ich lasse ihn eine eigene Wochenplanung erarbeiten und sie vor dem Team präsentieren. So sieht er, dass er die Abläufe auch selbst steuern kann.", "skills": [{"key": "Eigenverantwortung_und_Selbstwirksamkeit", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_13", "text": "Die Geschäftsführung möchte mehr Prozesse digitalisieren, viele Azubis reagieren skeptisch.", "options": [{"id": "A", "label": "Ich erkläre, dass Veränderungen normal sind, und zeige Schritt für Schritt, wie wir den Umstieg begleiten.", "skills": [{"key": "Veraenderungskompetenz", "weight": 1}]}, {"id": "B", "label": "Wir prüfen konkret: Welche Prozesse machen digital Sinn, welche nicht? Dabei achten wir auch auf Datenschutz und Verantwortlichkeiten.", "skills": [{"key": "Urteilsfaehigkeit", "weight": 1}, {"key": "Digitale_Ethik_und_KI_Governance", "weight": 1}]}, {"id": "C", "label": "Ich fordere die Azubis auf, selbst Ideen einzubringen, wie digitale Tools die Arbeit erleichtern könnten, und lasse sie kleine Tests durchführen.", "skills": [{"key": "Innovationskompetenz", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_14", "text": "In der Werkstatt fällt regelmäßig ein System aus, und die Ursache ist unklar.", "options": [{"id": "A", "label": "Ich lasse die Azubis mit Messgeräten die Bauteile prüfen, um Fehlerquellen zu finden.", "skills": [{"key": "Hardware_Robotikentwicklung", "weight": 1}]}, {"id": "B", "label": "Gemeinsam sehen wir uns die Steuerungssoftware an und suchen gezielt nach Fehlern in der Programmierung.", "skills": [{"key": "Softwareentwicklung", "weight": 1}, {"key": "Loesungsfaehigkeit", "weight": 1}]}, {"id": "C", "label": "Wir testen, ob Netzwerkprobleme oder fehlende Updates die Ausfälle verursachen.", "skills": [{"key": "Digitale_Infrastruktur_und_Cybersicherheit", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_15", "text": "Ein Azubi gibt bei komplizierten Aufgaben schnell auf.", "options": [{"id": "A", "label": "Ich ermutige ihn, durch kleine Teilerfolge dranzubleiben, und erinnere ihn daran, dass Fehler normal sind.", "skills": [{"key": "Resilienz", "weight": 1}]}, {"id": "B", "label": "Ich lasse ihn selbst Vorschläge machen, wie er an die Aufgabe herangehen könnte, und begleite ihn dabei.", "skills": [{"key": "Eigenverantwortung_und_Selbstwirksamkeit", "weight": 1}, {"key": "Loesungsfaehigkeit", "weight": 1}]}, {"id": "C", "label": "Wir probieren bewusst verschiedene Herangehensweisen aus, damit er merkt, dass es oft mehrere Wege zum Ziel gibt.", "skills": [{"key": "Agilitaet", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_16", "text": "Die Azubis sollen in Teams eine Präsentation mit digitalen Medien vorbereiten.", "options": [{"id": "A", "label": "Ich gebe die Aufgabe: „Gestaltet die Präsentation mit Bildern, Videos oder kurzen Clips.“ Sie teilen die Arbeit über ein Online-Board auf und entwickeln gemeinsam ein kreatives Endprodukt.", "skills": [{"key": "Digitale_Kollaboration", "weight": 1}, {"key": "Kreativitaet", "weight": 1}]}, {"id": "B", "label": "Wir üben, wie man seriöse Quellen auswählt, Zitate korrekt angibt und Inhalte sinnvoll einbindet.", "skills": [{"key": "Digital_Literacy", "weight": 1}]}, {"id": "C", "label": "Jeder Azubi stellt einen Teil der Präsentation in einer Probe vor der Gruppe. Ich gebe gezieltes Feedback, damit sie Sicherheit vor Publikum gewinnen.", "skills": [{"key": "Selbstbewusstsein", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_17", "text": "Ein Azubi hat einen Fehler gemacht und fürchtet eine strenge Rüge.", "options": [{"id": "A", "label": "Ich erkläre, dass Fehler passieren, aber Verantwortung wichtig ist. Er soll den Fehler selbst offenlegen und wir überlegen gemeinsam, wie es besser geht.", "skills": [{"key": "Resilienz", "weight": 1}, {"key": "Werteorientiertes_Handeln", "weight": 1}]}, {"id": "B", "label": "Ich bespreche den Vorfall im Vier-Augen-Gespräch: „Was ist passiert, und wie gehst du beim nächsten Mal vor?“ So wird der Fehler sachlich aufgearbeitet.", "skills": [{"key": "Dialog_und_Konfliktfaehigkeit", "weight": 1}]}, {"id": "C", "label": "Ich fordere ihn auf, seine Arbeitsweise anzupassen, z. B. durch eine zusätzliche Kontrolle, und begleite die Umsetzung.", "skills": [{"key": "Veraenderungskompetenz", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_18", "text": "Die Azubis sollen mit einem KI-gestützten Tool ihre Lernfortschritte dokumentieren.", "options": [{"id": "A", "label": "Ich zeige, wie das Tool Lernstände auswertet, und lasse die Azubis ihre Stärken und Schwächen sichtbar machen.", "skills": [{"key": "KI_gestuetztes_Lernen_und_Weiterbildung", "weight": 1}]}, {"id": "B", "label": "Wir legen gemeinsam Ordnerstrukturen an und Regeln für die Ablage der Ergebnisse, damit später alles nachvollziehbar bleibt.", "skills": [{"key": "Datenmanagement", "weight": 1}]}, {"id": "C", "label": "Ich bespreche mit den Azubis, wie sie die Auswertungen kritisch lesen können, um nicht blind auf Zahlen zu vertrauen.", "skills": [{"key": "Digital_Literacy", "weight": 1}, {"key": "Urteilsfaehigkeit", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_19", "text": "Das Unternehmen möchte neue Märkte erschließen, die Azubis sollen Ideen beisteuern.", "options": [{"id": "A", "label": "Ich gebe den Auftrag: „Überlegt, wie wir neue Kunden gewinnen könnten.“ Die Azubis entwickeln konkrete Vorschläge und präsentieren sie.", "skills": [{"key": "Unternehmerisches_Denken_und_Innovationsgeist", "weight": 1}]}, {"id": "B", "label": "Wir diskutieren, wie man unterschiedliche Kulturen anspricht, z. B. durch Sprachvarianten oder angepasste Werbung.", "skills": [{"key": "Weltoffenheit", "weight": 1}, {"key": "Interkulturelle_Kommunikation", "weight": 1}]}, {"id": "C", "label": "Gemeinsam wägen wir Chancen und Risiken der Vorschläge ab und entscheiden, welche Ansätze wir testen.", "skills": [{"key": "Urteilsfaehigkeit", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_20", "text": "Ein Azubi bringt einen Verbesserungsvorschlag für den Ablauf in der Ausbildung ein.", "options": [{"id": "A", "label": "Ich lasse ihn den Vorschlag konkret im Team vorstellen und gebe Raum für Rückfragen. Danach planen wir gemeinsam einen Testlauf.", "skills": [{"key": "Innovationskompetenz", "weight": 1}]}, {"id": "B", "label": "Wir spinnen die Idee im Team weiter, bauen Beispiele und passen sie an die Realität an. So erlebt er, wie aus einer Idee ein Konzept entsteht.", "skills": [{"key": "Kreativitaet", "weight": 1}]}, {"id": "C", "label": "Ich übertrage ihm die Verantwortung für die Umsetzung im Kleinen und begleite die Veränderungen Schritt für Schritt.", "skills": []}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_21", "text": "Die Azubis sollen mit einem KI-Tool (z. B. ChatGPT) eine kurze Anleitung für die Werkstatt erstellen.", "options": [{"id": "A", "label": "Ich lasse sie ausprobieren, wie sich die Antworten verändern, wenn sie ihre Fragen präziser formulieren.", "skills": [{"key": "Prompt_Engineering", "weight": 1}]}, {"id": "B", "label": "Wir vergleichen die KI-Ausgabe mit Fachliteratur und prüfen, ob die Inhalte korrekt sind.", "skills": [{"key": "Digital_Literacy", "weight": 1}]}, {"id": "C", "label": "Die Azubis verfassen spielerische Prompts, z. B. im Stil einer Comicfigur, um zu sehen, wie flexibel die KI reagiert.", "skills": [{"key": "Kreativitaet", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_22", "text": "Wir wollen die Azubi-Mappe im Betrieb digital überarbeiten.", "options": [{"id": "A", "label": "Die Azubis befragen andere Azubis, welche Infos sie wirklich brauchen, und passen das Layout danach an.", "skills": [{"key": "Nutzerzentriertes_Design", "weight": 1}]}, {"id": "B", "label": "Sie erarbeiten die Mappe gemeinsam in einem Online-Tool und stimmen die Änderungen ab.", "skills": [{"key": "Digitale_Kollaboration", "weight": 1}]}, {"id": "C", "label": "Ich betone, dass die Mappe fair und praxisnah sein muss, nicht nur „schön“.", "skills": [{"key": "Werteorientiertes_Handeln", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_23", "text": "Ein kleines Script soll Routineaufgaben (z. B. Dateneingabe) erleichtern.", "options": [{"id": "A", "label": "Ich lasse die Azubis mit einfachen Programmierbausteinen ein Script entwickeln, das automatisch Listen erstellt.", "skills": [{"key": "Softwareentwicklung", "weight": 1}]}, {"id": "B", "label": "Wir prüfen, ob die Daten korrekt übertragen werden und wie man sie sicher speichert.", "skills": [{"key": "Datenmanagement", "weight": 1}]}, {"id": "C", "label": "Gemeinsam suchen wir Fehler im Script und überlegen, wie es verbessert werden kann.", "skills": [{"key": "Loesungsfaehigkeit", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_24", "text": "Das Unternehmen hat eine Kooperation mit einem Betrieb im Ausland.", "options": [{"id": "A", "label": "Ich ermuntere die Azubis, neugierig auf Unterschiede zu reagieren, z. B. durch Nachfragen nach Arbeitsweisen oder Feiertagen.", "skills": [{"key": "Weltoffenheit", "weight": 1}]}, {"id": "B", "label": "Wir üben, wie man Missverständnisse klärt, wenn Fachbegriffe unterschiedlich genutzt werden.", "skills": [{"key": "Interkulturelle_Kommunikation", "weight": 1}]}, {"id": "C", "label": "Ich mache klar, dass Respekt und Interesse wichtiger sind als perfekte Sprachkenntnisse.", "skills": [{"key": "Freundlichkeit", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_25", "text": "Ein Azubi soll erstmals vor der Geschäftsführung ein Projektergebnis vorstellen.", "options": [{"id": "A", "label": "Ich lasse ihn die Präsentation mehrfach in kleiner Runde üben und gebe Feedback zu Stimme, Haltung und Auftreten.", "skills": [{"key": "Selbstbewusstsein", "weight": 1}]}, {"id": "B", "label": "Er darf eigene Visualisierungen oder Praxisbeispiele einbauen, um die Präsentation lebendiger zu machen.", "skills": [{"key": "Kreativitaet", "weight": 1}]}, {"id": "C", "label": "Sollte er ins Stocken geraten, ermutige ich ihn, sofort nochmal zu starten, damit er merkt, dass man Rückschläge überwinden kann.", "skills": [{"key": "Resilienz", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_26", "text": "Die Azubis sollen eine Schichtplanung erstellen, bei der manche mehr ungeliebte Aufgaben übernehmen müssten.", "options": [{"id": "A", "label": "Ich fordere sie auf, eine faire Lösung zu entwickeln, die die Belastungen gleichmäßig verteilt.", "skills": [{"key": "Werteorientiertes_Handeln", "weight": 1}]}, {"id": "B", "label": "Wir besprechen offen, wo Unzufriedenheit besteht, und suchen einen Kompromiss.", "skills": [{"key": "Dialog_und_Konfliktfaehigkeit", "weight": 1}]}, {"id": "C", "label": "Ich erkläre, dass manchmal betriebliche Notwendigkeiten Vorrang haben, und begründe die Entscheidung transparent.", "skills": [{"key": "Urteilsfaehigkeit", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_27", "text": "Die Azubis sollen die Bedienungsanleitung für eine neue Maschine einfacher gestalten.", "options": [{"id": "A", "label": "Ich lasse sie die Anleitung Azubi-gerecht umschreiben und mit Piktogrammen versehen. Danach testen andere Azubis, ob sie die Schritte verstehen.", "skills": [{"key": "Nutzerzentriertes_Design", "weight": 1}]}, {"id": "B", "label": "Sie entwickeln kleine Erklärvideos oder Comics, die denselben Inhalt verständlicher machen.", "skills": [{"key": "Kreativitaet", "weight": 1}]}, {"id": "C", "label": "Wir prüfen gemeinsam, ob die übernommenen Inhalte aus Online-Quellen korrekt und seriös sind.", "skills": [{"key": "Digital_Literacy", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_28", "text": "Für die Lagerverwaltung soll ein Chatbot entwickelt werden, der Standardfragen beantwortet.", "options": [{"id": "A", "label": "Ich zeige, wie sich die Antworten verändern, wenn man exakte Formulierungen eingibt. Die Azubis testen verschiedene Prompts und vergleichen die Ergebnisse.", "skills": [{"key": "Prompt_Engineering", "weight": 1}]}, {"id": "B", "label": "Wir bauen einfache Entscheidungsbäume im Chatbot und probieren die Abläufe durch.", "skills": [{"key": "Softwareentwicklung", "weight": 1}]}, {"id": "C", "label": "Wir diskutieren, welche Fragen sinnvoll sind und wo ein Mensch besser reagieren sollte.", "skills": [{"key": "Digitale_Ethik_und_KI_Governance", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_29", "text": "Im Büro müssen regelmäßig große Datenmengen (z. B. Kundendaten) geprüft werden.", "options": [{"id": "A", "label": "Ich lasse die Azubis Daten in ein KI-Tool einspeisen und beobachten, welche Muster oder Fehler die KI erkennt.", "skills": [{"key": "KI_Datenkompetenz", "weight": 1}]}, {"id": "B", "label": "Gemeinsam entwickeln wir klare Regeln, wie diese Daten strukturiert und abgelegt werden.", "skills": [{"key": "Datenmanagement", "weight": 1}]}, {"id": "C", "label": "Wir besprechen kritisch, ob die Ergebnisse der KI wirklich plausibel sind oder ob man manuell gegenprüfen muss.", "skills": [{"key": "Urteilsfaehigkeit", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_30", "text": "Ein Azubi schlägt vor, einen Teil der Qualitätskontrolle per App zu digitalisieren.", "options": [{"id": "A", "label": "Ich ermutige das Team, die neue Methode im Pilotlauf zu testen, auch wenn es ungewohnt ist.", "skills": [{"key": "Veraenderungskompetenz", "weight": 1}]}, {"id": "B", "label": "Der Azubi stellt seine Idee mit Prototyp-Screens vor und wir überlegen gemeinsam Verbesserungen.", "skills": [{"key": "Innovationskompetenz", "weight": 1}]}, {"id": "C", "label": "Wir passen Abläufe kurzfristig an, damit die App sinnvoll ausprobiert werden kann.", "skills": [{"key": "Agilitaet", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_31", "text": "Es soll ein einfaches Programm geschrieben werden, das automatisch Etiketten erstellt.", "options": [{"id": "A", "label": "Ich erkläre Grundlagen von Variablen und Schleifen und lasse die Azubis kleine Code-Teile selbst schreiben.", "skills": [{"key": "Softwareentwicklung", "weight": 1}]}, {"id": "B", "label": "Wir prüfen das Programm auf Fehler und verbessern es Schritt für Schritt.", "skills": [{"key": "Loesungsfaehigkeit", "weight": 1}]}, {"id": "C", "label": "Wenn ein Fehler wieder auftaucht, trainiere ich Geduld: „Fehler sind normal – probier’s nochmal, bis es läuft.“", "skills": [{"key": "Resilienz", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_32", "text": "Für einen Kundenauftrag müssen alle Sicherheitsanforderungen digital dokumentiert werden.", "options": [{"id": "A", "label": "Ich erkläre, wie man sichere Passwörter wählt, Daten verschlüsselt und Zugriffsrechte setzt.", "skills": [{"key": "Digitale_Infrastruktur_und_Cybersicherheit", "weight": 1}]}, {"id": "B", "label": "Wir diskutieren, warum Sicherheit auch Vertrauen beim Kunden bedeutet.", "skills": [{"key": "Werteorientiertes_Handeln", "weight": 1}]}, {"id": "C", "label": "Der Azubi übernimmt eigenständig die Verantwortung für eine Checkliste und zeigt, dass er es zuverlässig kann.", "skills": [{"key": "Eigenverantwortung_und_Selbstwirksamkeit", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_33", "text": "Im Rahmen einer Projektarbeit sollen die Azubis ihre Ergebnisse vor einem Gremium vorstellen.", "options": [{"id": "A", "label": "Jeder Azubi übernimmt einen Part, übt den Vortrag mehrmals und bekommt Feedback zu Stimme und Auftreten.", "skills": [{"key": "Selbstbewusstsein", "weight": 1}]}, {"id": "B", "label": "Wir laden Kolleg:innen mit anderem Hintergrund dazu ein, damit die Azubis ihre Präsentation auch für unterschiedliche Zielgruppen verständlich machen.", "skills": [{"key": "Weltoffenheit", "weight": 1}]}, {"id": "C", "label": "Nach der Präsentation müssen sie sich den kritischen Fragen des Gremiums stellen.", "skills": [{"key": "Dialog_und_Konfliktfaehigkeit", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_34", "text": "Die Azubis sollen sich auf eine Zwischenprüfung vorbereiten.", "options": [{"id": "A", "label": "Ich lasse sie ein KI-Tool nutzen, das aus den Lerninhalten Quizfragen generiert. So können sie ihren Wissensstand direkt testen.", "skills": [{"key": "KI_gestuetztes_Lernen_und_Weiterbildung", "weight": 1}]}, {"id": "B", "label": "Jeder Azubi entscheidet selbst, wie viele Quizrunden er macht und dokumentiert die Ergebnisse.", "skills": [{"key": "Eigenverantwortung_und_Selbstwirksamkeit", "weight": 1}]}, {"id": "C", "label": "Ich erkläre, dass falsche Antworten keine Niederlage sind, sondern Hinweise, wo man noch üben sollte.", "skills": [{"key": "Resilienz", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}, {"id": "AUA_35", "text": "Ein Azubi möchte sich zusätzlich auf eine neue Software spezialisieren.", "options": [{"id": "A", "label": "Ich zeige, wie er ein KI-gestütztes Trainingsprogramm nutzen kann, das seinen Lernfortschritt automatisch anpasst.", "skills": [{"key": "KI_gestuetztes_Lernen_und_Weiterbildung", "weight": 1}]}, {"id": "B", "label": "Wir legen fest, wo er seine Übungsdateien ablegt und wie die Ergebnisse dokumentiert werden.", "skills": [{"key": "Datenmanagement", "weight": 1}]}, {"id": "C", "label": "Der Azubi entwickelt eigene kleine Praxisübungen mit der Software und präsentiert sie im Team.", "skills": [{"key": "Kreativitaet", "weight": 1}]}, {"id": "D", "label": "Nichts davon passt für meine Situation.", "skills": []}]}];
+/* ===== Szenarien ===== */
+const SCENARIOS = [{"id":"AUA_1","text":"Ein:e Azubi:ne kommt nach der Berufsschule in die Werkstatt und wirkt völlig demotiviert.","options":[{"id":"A","label":"Ich nehme mir kurz Zeit, frage konkret nach, was in der Schule passiert ist, und höre zu. Danach gebe ich eine kleine, sichtbare Aufgabe: z. B. die Werkzeugkiste für den nächsten Tag herrichten. Am Ende lobe ich die Arbeit – so erlebt der/die Azubi:ne trotz Frust ein Erfolgserlebnis.","skills":[{"key":"Resilienz","weight":1}]},{"id":"B","label":"Ich übertrage eine konkrete Aufgabe mit Verantwortung, z. B. die Materialbestellung für ein Projekt. Wenn der/die Azubi:ne merkt, dass es nur an ihm/ihr hing und funktioniert hat, stärkt das sein/ihr Selbstvertrauen.","skills":[{"key":"Eigenverantwortung_und_Selbstwirksamkeit","weight":1}]},{"id":"C","label":"Ich mache daraus ein Spiel: „Wer baut den stabilsten Werkzeugständer aus Restmaterialien?“ Am Ende präsentiere ich den Entwurf vor der Gruppe und lobe ihn/sie – so fühlt sich der/die Azubi:ne eingebunden.","skills":[{"key":"Kreativitaet","weight":1},{"key":"Freundlichkeit","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_2","text":"Im Betrieb wird ein neues digitales Planungstool eingeführt. Einige Azubis sind unsicher.","options":[{"id":"A","label":"Ich setze die Azubis an den Rechner und lasse sie sofort eine Aufgabe eintragen: „Tragt bitte eure Berufsschultage der nächsten Woche ein.“ So üben sie im direkten Tun.","skills":[{"key":"Digital_Literacy","weight":1}]},{"id":"B","label":"Ich bilde Tandems (ein erfahrener und ein unsicherer Azubi:ne). Gemeinsam erstellen sie den Schichtplan und stellen ihn im Team vor. So lernen sie digitale Abstimmung und Verantwortung.","skills":[{"key":"Digitale_Kollaboration","weight":1}]},{"id":"C","label":"Vor dem Start frage ich: „Was passiert, wenn jemand sein Passwort weitergibt?“ Dann erkläre ich mit einem echten Beispiel, dass ein falscher Eintrag im Betrieb große Folgen haben kann.","skills":[{"key":"Digitale_Ethik_und_KI_Governance","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_3","text":"Zwei Azubis geraten über die Arbeitsaufteilung in Streit.","options":[{"id":"A","label":"Ich hole beide aus der Werkstatt, lasse jede:n nacheinander erklären und leite die Frage ein: „Wie würdet ihr es lösen, wenn ihr die Entscheidung für die Gruppe trefft?“ So entwickeln sie meist selbst eine Lösung.","skills":[{"key":"Dialog_und_Konfliktfaehigkeit","weight":1}]},{"id":"B","label":"Ich erinnere beide daran, dass Teamarbeit heißt, sich gegenseitig zu unterstützen. Dann fordere ich sie auf, dem/der anderen etwas Positives zu nennen, das er/sie gut gemacht hat.","skills":[{"key":"Freundlichkeit","weight":1}]},{"id":"C","label":"Wenn es keine Einigung gibt, treffe ich die Entscheidung, erkläre sie aber klar: „Du übernimmst die Schweißarbeiten, weil du das Werkzeug am besten beherrschst, und du führst die Doku, weil du darin schneller bist.“ So bleibt es fair.","skills":[{"key":"Urteilsfaehigkeit","weight":1},{"key":"Werteorientiertes_Handeln","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_4","text":"In der Werkstatt wird ein neuer Robotik-Prototyp getestet. Die Azubis haben bisher kaum Erfahrung.","options":[{"id":"A","label":"Ich zeige die Grundfunktionen am Prototyp, erkläre Sensoren und Motorik und lasse die Azubis einfache Handgriffe testen.","skills":[{"key":"Hardware_Robotikentwicklung","weight":1}]},{"id":"B","label":"Wir lesen die Bewegungsdaten und Fehlerprotokolle des Roboters aus. Ich erkläre, wie diese mit KI-Systemen ausgewertet werden, um Muster oder Störungen zu erkennen.","skills":[{"key":"KI_Datenkompetenz","weight":1}]},{"id":"C","label":"Ich gebe die Aufgabe: „Überlegt euch spontan drei Einsatzmöglichkeiten für den Roboter.“ Eine Gruppe denkt an den Transport von Werkstücken, eine an Sicherheitsprüfungen. Danach skizzieren sie ihre Ideen.","skills":[{"key":"Agilitaet","weight":1},{"key":"Kreativitaet","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_5","text":"Ein:e Azubi:ne hat Schwierigkeiten, Aufgaben rechtzeitig abzugeben.","options":[{"id":"A","label":"Ich teile die Aufgabe in Teilschritte und lasse den/die Azubi:ne selbst die Termine in den Kalender eintragen. Nach jeder Abgabe reflektieren wir, was gut lief.","skills":[{"key":"Eigenverantwortung_und_Selbstwirksamkeit","weight":1}]},{"id":"B","label":"Wir simulieren eine Störung: Ein neuer Auftrag kommt rein. Der/die Azubi:ne muss seine/ihre Reihenfolge umstellen und erklären, wie er/sie trotzdem fristgerecht abgibt.","skills":[{"key":"Agilitaet","weight":1},{"key":"Loesungsfaehigkeit","weight":1}]},{"id":"C","label":"Wenn er/sie trotz Planung scheitert, bespreche ich: „Was hat dich aufgehalten?“ Dann entwickeln wir Gegenstrategien, z. B. Pausen besser planen oder rechtzeitig Hilfe holen. So lernt er/sie, Rückschläge wegzustecken.","skills":[{"key":"Resilienz","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_6","text":"Die Azubis sollen erstmals ein Projekt eigenständig planen.","options":[{"id":"A","label":"Ich lasse sie ein Konzept erarbeiten, Kosten kalkulieren und anschließend im Team präsentieren. So üben sie, unternehmerisch zu denken.","skills":[{"key":"Unternehmerisches_Denken_und_Innovationsgeist","weight":1}]},{"id":"B","label":"Sie nutzen ein digitales Whiteboard, sammeln Ideen mit Post-its und stimmen sich im Team über die Plattform ab. Dadurch lernen sie kreative Methoden in digitaler Zusammenarbeit kennen.","skills":[{"key":"Kreativitaet","weight":1},{"key":"Digitale_Kollaboration","weight":1}]},{"id":"C","label":"Am Ende besprechen wir die Vorschläge systematisch: Was ist machbar, was zu teuer, was bringt den größten Nutzen? So lernen sie, Entscheidungen nachvollziehbar zu begründen.","skills":[{"key":"Urteilsfaehigkeit","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_7","text":"Ein:e Azubi:ne ist sehr still und beteiligt sich kaum an Diskussionen.","options":[{"id":"A","label":"Ich gebe ihm/ihr den Auftrag, beim nächsten Meeting einen kleinen Fortschritt zu präsentieren. Nach und nach bekommt er/sie so die Sicherheit, vor anderen zu sprechen.","skills":[{"key":"Selbstbewusstsein","weight":1}]},{"id":"B","label":"Ich sorge dafür, dass das Team ihn/sie nicht unterbricht, und betone, dass Respekt und Wertschätzung unsere Arbeitskultur prägen.","skills":[{"key":"Freundlichkeit","weight":1},{"key":"Werteorientiertes_Handeln","weight":1}]},{"id":"C","label":"Falls Unsicherheit durch kulturelle Unterschiede entsteht, spreche ich das offen an und unterstütze ihn/sie, die eigene Perspektive einzubringen.","skills":[{"key":"Interkulturelle_Kommunikation","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_8","text":"Die Azubis sollen ein digitales Projektboard nutzen, um ihre Arbeit zu organisieren.","options":[{"id":"A","label":"Jede Gruppe trägt ihre Aufgaben ein und markiert den Fortschritt. Am Ende der Woche sehen alle, wie weit die Teams sind.","skills":[{"key":"Digitale_Kollaboration","weight":1}]},{"id":"B","label":"Wir legen klare Regeln fest: Dateinamen, Versionen und Zuständigkeiten. So bleibt die Übersicht erhalten.","skills":[{"key":"Datenmanagement","weight":1}]},{"id":"C","label":"Ich erkläre, wie Filter und Benachrichtigungen funktionieren, und lasse sie in einer Übung spontan Aufgaben verschieben, wenn Prioritäten sich ändern.","skills":[{"key":"Digital_Literacy","weight":1},{"key":"Agilitaet","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_9","text":"Ein:e Azubi:ne bringt eine ungewöhnliche Idee zur Verbesserung eines Arbeitsablaufs ein.","options":[{"id":"A","label":"Ich gebe Raum, die Idee mit einem kleinen Modell oder Ablaufplan zu skizzieren und dem Team vorzustellen.","skills":[{"key":"Kreativitaet","weight":1}]},{"id":"B","label":"Gemeinsam prüfen wir, ob die Idee praktikabel ist, und bewerten Kosten, Nutzen und Zeitaufwand.","skills":[{"key":"Innovationskompetenz","weight":1},{"key":"Urteilsfaehigkeit","weight":1}]},{"id":"C","label":"Ich motiviere das Team, die Idee in einem Testlauf auszuprobieren, auch wenn sie ungewohnt ist.","skills":[{"key":"Veraenderungskompetenz","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_10","text":"Im Online-Unterricht sind mehrere Azubis unkonzentriert und mit dem Handy beschäftigt.","options":[{"id":"A","label":"Ich zeige, wie KI-Tools wie Quiz-Apps oder automatische Zusammenfassungen helfen können, den Stoff zu wiederholen.","skills":[{"key":"KI_gestuetztes_Lernen_und_Weiterbildung","weight":1}]},{"id":"B","label":"Wir üben, wie man seriöse Informationen im Netz findet und Quellen überprüft.","skills":[{"key":"Digital_Literacy","weight":1}]},{"id":"C","label":"Ich fordere die Azubis auf, ihre Lernzeit selbst einzuteilen, und bespreche, wie man auch bei Langeweile oder Schwierigkeiten am Ball bleibt.","skills":[{"key":"Eigenverantwortung_und_Selbstwirksamkeit","weight":1},{"key":"Resilienz","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_12","text":"Ein Azubi wirkt überfordert, weil er mehrere Aufgaben parallel erledigen soll.","options":[{"id":"A","label":"Wir teilen die Aufgaben auf, erstellen eine Prioritätenliste und vereinbaren klare Reihenfolgen.","skills":[{"key":"Loesungsfaehigkeit","weight":1}]},{"id":"B","label":"Ich simuliere mit ihm eine Änderung im Ablaufplan: plötzlich hat ein Auftrag Vorrang. Er lernt, flexibel umzustellen und trotzdem dranzubleiben.","skills":[{"key":"Agilitaet","weight":1},{"key":"Resilienz","weight":1}]},{"id":"C","label":"Ich lasse ihn eine eigene Wochenplanung erarbeiten und sie vor dem Team präsentieren. So sieht er, dass er die Abläufe auch selbst steuern kann.","skills":[{"key":"Eigenverantwortung_und_Selbstwirksamkeit","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_13","text":"Die Geschäftsführung möchte mehr Prozesse digitalisieren, viele Azubis reagieren skeptisch.","options":[{"id":"A","label":"Ich erkläre, dass Veränderungen normal sind, und zeige Schritt für Schritt, wie wir den Umstieg begleiten.","skills":[{"key":"Veraenderungskompetenz","weight":1}]},{"id":"B","label":"Wir prüfen konkret: Welche Prozesse machen digital Sinn, welche nicht? Dabei achten wir auch auf Datenschutz und Verantwortlichkeiten.","skills":[{"key":"Urteilsfaehigkeit","weight":1},{"key":"Digitale_Ethik_und_KI_Governance","weight":1}]},{"id":"C","label":"Ich fordere die Azubis auf, selbst Ideen einzubringen, wie digitale Tools die Arbeit erleichtern könnten, und lasse sie kleine Tests durchführen.","skills":[{"key":"Innovationskompetenz","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_14","text":"In der Werkstatt fällt regelmäßig ein System aus, und die Ursache ist unklar.","options":[{"id":"A","label":"Ich lasse die Azubis mit Messgeräten die Bauteile prüfen, um Fehlerquellen zu finden.","skills":[{"key":"Hardware_Robotikentwicklung","weight":1}]},{"id":"B","label":"Gemeinsam sehen wir uns die Steuerungssoftware an und suchen gezielt nach Fehlern in der Programmierung.","skills":[{"key":"Softwareentwicklung","weight":1},{"key":"Loesungsfaehigkeit","weight":1}]},{"id":"C","label":"Wir testen, ob Netzwerkprobleme oder fehlende Updates die Ausfälle verursachen.","skills":[{"key":"Digitale_Infrastruktur_und_Cybersicherheit","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_15","text":"Ein Azubi gibt bei komplizierten Aufgaben schnell auf.","options":[{"id":"A","label":"Ich ermutige ihn, durch kleine Teilerfolge dranzubleiben, und erinnere ihn daran, dass Fehler normal sind.","skills":[{"key":"Resilienz","weight":1}]},{"id":"B","label":"Ich lasse ihn selbst Vorschläge machen, wie er an die Aufgabe herangehen könnte, und begleite ihn dabei.","skills":[{"key":"Eigenverantwortung_und_Selbstwirksamkeit","weight":1},{"key":"Loesungsfaehigkeit","weight":1}]},{"id":"C","label":"Wir probieren bewusst verschiedene Herangehensweisen aus, damit er merkt, dass es oft mehrere Wege zum Ziel gibt.","skills":[{"key":"Agilitaet","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_16","text":"Die Azubis sollen in Teams eine Präsentation mit digitalen Medien vorbereiten.","options":[{"id":"A","label":"Ich gebe die Aufgabe: „Gestaltet die Präsentation mit Bildern, Videos oder kurzen Clips.“ Sie teilen die Arbeit über ein Online-Board auf und entwickeln gemeinsam ein kreatives Endprodukt.","skills":[{"key":"Digitale_Kollaboration","weight":1},{"key":"Kreativitaet","weight":1}]},{"id":"B","label":"Wir üben, wie man seriöse Quellen auswählt, Zitate korrekt angibt und Inhalte sinnvoll einbindet.","skills":[{"key":"Digital_Literacy","weight":1}]},{"id":"C","label":"Jeder Azubi stellt einen Teil der Präsentation in einer Probe vor der Gruppe. Ich gebe gezieltes Feedback, damit sie Sicherheit vor Publikum gewinnen.","skills":[{"key":"Selbstbewusstsein","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_17","text":"Ein Azubi hat einen Fehler gemacht und fürchtet eine strenge Rüge.","options":[{"id":"A","label":"Ich erkläre, dass Fehler passieren, aber Verantwortung wichtig ist. Er soll den Fehler selbst offenlegen und wir überlegen gemeinsam, wie es besser geht.","skills":[{"key":"Resilienz","weight":1},{"key":"Werteorientiertes_Handeln","weight":1}]},{"id":"B","label":"Ich bespreche den Vorfall im Vier-Augen-Gespräch: „Was ist passiert, und wie gehst du beim nächsten Mal vor?“ So wird der Fehler sachlich aufgearbeitet.","skills":[{"key":"Dialog_und_Konfliktfaehigkeit","weight":1}]},{"id":"C","label":"Ich fordere ihn auf, seine Arbeitsweise anzupassen, z. B. durch eine zusätzliche Kontrolle, und begleite die Umsetzung.","skills":[{"key":"Veraenderungskompetenz","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_18","text":"Die Azubis sollen mit einem KI-gestützten Tool ihre Lernfortschritte dokumentieren.","options":[{"id":"A","label":"Ich zeige, wie das Tool Lernstände auswertet, und lasse die Azubis ihre Stärken und Schwächen sichtbar machen.","skills":[{"key":"KI_gestuetztes_Lernen_und_Weiterbildung","weight":1}]},{"id":"B","label":"Wir legen gemeinsam Ordnerstrukturen an und Regeln für die Ablage der Ergebnisse, damit später alles nachvollziehbar bleibt.","skills":[{"key":"Datenmanagement","weight":1}]},{"id":"C","label":"Ich bespreche mit den Azubis, wie sie die Auswertungen kritisch lesen können, um nicht blind auf Zahlen zu vertrauen.","skills":[{"key":"Digital_Literacy","weight":1},{"key":"Urteilsfaehigkeit","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_19","text":"Das Unternehmen möchte neue Märkte erschließen, die Azubis sollen Ideen beisteuern.","options":[{"id":"A","label":"Ich gebe den Auftrag: „Überlegt, wie wir neue Kunden gewinnen könnten.“ Die Azubis entwickeln konkrete Vorschläge und präsentieren sie.","skills":[{"key":"Unternehmerisches_Denken_und_Innovationsgeist","weight":1}]},{"id":"B","label":"Wir diskutieren, wie man unterschiedliche Kulturen anspricht, z. B. durch Sprachvarianten oder angepasste Werbung.","skills":[{"key":"Weltoffenheit","weight":1},{"key":"Interkulturelle_Kommunikation","weight":1}]},{"id":"C","label":"Gemeinsam wägen wir Chancen und Risiken der Vorschläge ab und entscheiden, welche Ansätze wir testen.","skills":[{"key":"Urteilsfaehigkeit","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_20","text":"Ein Azubi bringt einen Verbesserungsvorschlag für den Ablauf in der Ausbildung ein.","options":[{"id":"A","label":"Ich lasse ihn den Vorschlag konkret im Team vorstellen und gebe Raum für Rückfragen. Danach planen wir gemeinsam einen Testlauf.","skills":[{"key":"Innovationskompetenz","weight":1}]},{"id":"B","label":"Wir spinnen die Idee im Team weiter, bauen Beispiele und passen sie an die Realität an. So erlebt er, wie aus einer Idee ein Konzept entsteht.","skills":[{"key":"Kreativitaet","weight":1}]},{"id":"C","label":"Ich übertrage ihm die Verantwortung für die Umsetzung im Kleinen und begleite die Veränderungen Schritt für Schritt.","skills":[]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_21","text":"Die Azubis sollen mit einem KI-Tool (z. B. ChatGPT) eine kurze Anleitung für die Werkstatt erstellen.","options":[{"id":"A","label":"Ich lasse sie ausprobieren, wie sich die Antworten verändern, wenn sie ihre Fragen präziser formulieren.","skills":[{"key":"Prompt_Engineering","weight":1}]},{"id":"B","label":"Wir vergleichen die KI-Ausgabe mit Fachliteratur und prüfen, ob die Inhalte korrekt sind.","skills":[{"key":"Digital_Literacy","weight":1}]},{"id":"C","label":"Die Azubis verfassen spielerische Prompts, z. B. im Stil einer Comicfigur, um zu sehen, wie flexibel die KI reagiert.","skills":[{"key":"Kreativitaet","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_22","text":"Wir wollen die Azubi-Mappe im Betrieb digital überarbeiten.","options":[{"id":"A","label":"Die Azubis befragen andere Azubis, welche Infos sie wirklich brauchen, und passen das Layout danach an.","skills":[{"key":"Nutzerzentriertes_Design","weight":1}]},{"id":"B","label":"Sie erarbeiten die Mappe gemeinsam in einem Online-Tool und stimmen die Änderungen ab.","skills":[{"key":"Digitale_Kollaboration","weight":1}]},{"id":"C","label":"Ich betone, dass die Mappe fair und praxisnah sein muss, nicht nur „schön“.","skills":[{"key":"Werteorientiertes_Handeln","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_23","text":"Ein kleines Script soll Routineaufgaben (z. B. Dateneingabe) erleichtern.","options":[{"id":"A","label":"Ich lasse die Azubis mit einfachen Programmierbausteinen ein Script entwickeln, das automatisch Listen erstellt.","skills":[{"key":"Softwareentwicklung","weight":1}]},{"id":"B","label":"Wir prüfen, ob die Daten korrekt übertragen werden und wie man sie sicher speichert.","skills":[{"key":"Datenmanagement","weight":1}]},{"id":"C","label":"Gemeinsam suchen wir Fehler im Script und überlegen, wie es verbessert werden kann.","skills":[{"key":"Loesungsfaehigkeit","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_24","text":"Das Unternehmen hat eine Kooperation mit einem Betrieb im Ausland.","options":[{"id":"A","label":"Ich ermuntere die Azubis, neugierig auf Unterschiede zu reagieren, z. B. durch Nachfragen nach Arbeitsweisen oder Feiertagen.","skills":[{"key":"Weltoffenheit","weight":1}]},{"id":"B","label":"Wir üben, wie man Missverständnisse klärt, wenn Fachbegriffe unterschiedlich genutzt werden.","skills":[{"key":"Interkulturelle_Kommunikation","weight":1}]},{"id":"C","label":"Ich mache klar, dass Respekt und Interesse wichtiger sind als perfekte Sprachkenntnisse.","skills":[{"key":"Freundlichkeit","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_25","text":"Ein Azubi soll erstmals vor der Geschäftsführung ein Projektergebnis vorstellen.","options":[{"id":"A","label":"Ich lasse ihn die Präsentation mehrfach in kleiner Runde üben und gebe Feedback zu Stimme, Haltung und Auftreten.","skills":[{"key":"Selbstbewusstsein","weight":1}]},{"id":"B","label":"Er darf eigene Visualisierungen oder Praxisbeispiele einbauen, um die Präsentation lebendiger zu machen.","skills":[{"key":"Kreativitaet","weight":1}]},{"id":"C","label":"Sollte er ins Stocken geraten, ermutige ich ihn, sofort nochmal zu starten, damit er merkt, dass man Rückschläge überwinden kann.","skills":[{"key":"Resilienz","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_26","text":"Die Azubis sollen eine Schichtplanung erstellen, bei der manche mehr ungeliebte Aufgaben übernehmen müssten.","options":[{"id":"A","label":"Ich fordere sie auf, eine faire Lösung zu entwickeln, die die Belastungen gleichmäßig verteilt.","skills":[{"key":"Werteorientiertes_Handeln","weight":1}]},{"id":"B","label":"Wir besprechen offen, wo Unzufriedenheit besteht, und suchen einen Kompromiss.","skills":[{"key":"Dialog_und_Konfliktfaehigkeit","weight":1}]},{"id":"C","label":"Ich erkläre, dass manchmal betriebliche Notwendigkeiten Vorrang haben, und begründe die Entscheidung transparent.","skills":[{"key":"Urteilsfaehigkeit","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_27","text":"Die Azubis sollen die Bedienungsanleitung für eine neue Maschine einfacher gestalten.","options":[{"id":"A","label":"Ich lasse sie die Anleitung Azubi-gerecht umschreiben und mit Piktogrammen versehen. Danach testen andere Azubis, ob sie die Schritte verstehen.","skills":[{"key":"Nutzerzentriertes_Design","weight":1}]},{"id":"B","label":"Sie entwickeln kleine Erklärvideos oder Comics, die denselben Inhalt verständlicher machen.","skills":[{"key":"Kreativitaet","weight":1}]},{"id":"C","label":"Wir prüfen gemeinsam, ob die übernommenen Inhalte aus Online-Quellen korrekt und seriös sind.","skills":[{"key":"Digital_Literacy","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_28","text":"Für die Lagerverwaltung soll ein Chatbot entwickelt werden, der Standardfragen beantwortet.","options":[{"id":"A","label":"Ich zeige, wie sich die Antworten verändern, wenn man exakte Formulierungen eingibt. Die Azubis testen verschiedene Prompts und vergleichen die Ergebnisse.","skills":[{"key":"Prompt_Engineering","weight":1}]},{"id":"B","label":"Wir bauen einfache Entscheidungsbäume im Chatbot und probieren die Abläufe durch.","skills":[{"key":"Softwareentwicklung","weight":1}]},{"id":"C","label":"Wir diskutieren, welche Fragen sinnvoll sind und wo ein Mensch besser reagieren sollte.","skills":[{"key":"Digitale_Ethik_und_KI_Governance","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_29","text":"Im Büro müssen regelmäßig große Datenmengen (z. B. Kundendaten) geprüft werden.","options":[{"id":"A","label":"Ich lasse die Azubis Daten in ein KI-Tool einspeisen und beobachten, welche Muster oder Fehler die KI erkennt.","skills":[{"key":"KI_Datenkompetenz","weight":1}]},{"id":"B","label":"Gemeinsam entwickeln wir klare Regeln, wie diese Daten strukturiert und abgelegt werden.","skills":[{"key":"Datenmanagement","weight":1}]},{"id":"C","label":"Wir besprechen kritisch, ob die Ergebnisse der KI wirklich plausibel sind oder ob man manuell gegenprüfen muss.","skills":[{"key":"Urteilsfaehigkeit","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_30","text":"Ein Azubi schlägt vor, einen Teil der Qualitätskontrolle per App zu digitalisieren.","options":[{"id":"A","label":"Ich ermutige das Team, die neue Methode im Pilotlauf zu testen, auch wenn es ungewohnt ist.","skills":[{"key":"Veraenderungskompetenz","weight":1}]},{"id":"B","label":"Der Azubi stellt seine Idee mit Prototyp-Screens vor und wir überlegen gemeinsam Verbesserungen.","skills":[{"key":"Innovationskompetenz","weight":1}]},{"id":"C","label":"Wir passen Abläufe kurzfristig an, damit die App sinnvoll ausprobiert werden kann.","skills":[{"key":"Agilitaet","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_31","text":"Es soll ein einfaches Programm geschrieben werden, das automatisch Etiketten erstellt.","options":[{"id":"A","label":"Ich erkläre Grundlagen von Variablen und Schleifen und lasse die Azubis kleine Code-Teile selbst schreiben.","skills":[{"key":"Softwareentwicklung","weight":1}]},{"id":"B","label":"Wir prüfen das Programm auf Fehler und verbessern es Schritt für Schritt.","skills":[{"key":"Loesungsfaehigkeit","weight":1}]},{"id":"C","label":"Wenn ein Fehler wieder auftaucht, trainiere ich Geduld: „Fehler sind normal – probier’s nochmal, bis es läuft.“","skills":[{"key":"Resilienz","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_32","text":"Für einen Kundenauftrag müssen alle Sicherheitsanforderungen digital dokumentiert werden.","options":[{"id":"A","label":"Ich erkläre, wie man sichere Passwörter wählt, Daten verschlüsselt und Zugriffsrechte setzt.","skills":[{"key":"Digitale_Infrastruktur_und_Cybersicherheit","weight":1}]},{"id":"B","label":"Wir diskutieren, warum Sicherheit auch Vertrauen beim Kunden bedeutet.","skills":[{"key":"Werteorientiertes_Handeln","weight":1}]},{"id":"C","label":"Der Azubi übernimmt eigenständig die Verantwortung für eine Checkliste und zeigt, dass er es zuverlässig kann.","skills":[{"key":"Eigenverantwortung_und_Selbstwirksamkeit","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_33","text":"Im Rahmen einer Projektarbeit sollen die Azubis ihre Ergebnisse vor einem Gremium vorstellen.","options":[{"id":"A","label":"Jeder Azubi übernimmt einen Part, übt den Vortrag mehrmals und bekommt Feedback zu Stimme und Auftreten.","skills":[{"key":"Selbstbewusstsein","weight":1}]},{"id":"B","label":"Wir laden Kolleg:innen mit anderem Hintergrund dazu ein, damit die Azubis ihre Präsentation auch für unterschiedliche Zielgruppen verständlich machen.","skills":[{"key":"Weltoffenheit","weight":1}]},{"id":"C","label":"Nach der Präsentation müssen sie sich den kritischen Fragen des Gremiums stellen.","skills":[{"key":"Dialog_und_Konfliktfaehigkeit","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_34","text":"Die Azubis sollen sich auf eine Zwischenprüfung vorbereiten.","options":[{"id":"A","label":"Ich lasse sie ein KI-Tool nutzen, das aus den Lerninhalten Quizfragen generiert. So können sie ihren Wissensstand direkt testen.","skills":[{"key":"KI_gestuetztes_Lernen_und_Weiterbildung","weight":1}]},{"id":"B","label":"Jeder Azubi entscheidet selbst, wie viele Quizrunden er macht und dokumentiert die Ergebnisse.","skills":[{"key":"Eigenverantwortung_und_Selbstwirksamkeit","weight":1}]},{"id":"C","label":"Ich erkläre, dass falsche Antworten keine Niederlage sind, sondern Hinweise, wo man noch üben sollte.","skills":[{"key":"Resilienz","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]} , {"id":"AUA_35","text":"Ein Azubi möchte sich zusätzlich auf eine neue Software spezialisieren.","options":[{"id":"A","label":"Ich zeige, wie er ein KI-gestütztes Trainingsprogramm nutzen kann, das seinen Lernfortschritt automatisch anpasst.","skills":[{"key":"KI_gestuetztes_Lernen_und_Weiterbildung","weight":1}]},{"id":"B","label":"Wir legen fest, wo er seine Übungsdateien ablegt und wie die Ergebnisse dokumentiert werden.","skills":[{"key":"Datenmanagement","weight":1}]},{"id":"C","label":"Der Azubi entwickelt eigene kleine Praxisübungen mit der Software und präsentiert sie im Team.","skills":[{"key":"Kreativitaet","weight":1}]},{"id":"D","label":"Nichts davon passt für meine Situation.","skills":[]}]}];
 
 /* ===== State ===== */
 const allSkills = Object.values(CATEGORIES).flat();
@@ -289,8 +290,26 @@ function resetState(){
   sessionStorage.removeItem(STORAGE_KEY);
   sessionStorage.removeItem(STORAGE_QIDX);
 }
-function formatSkillLabel(key){ return SKILL_LABELS[key] || key.replaceAll("_"," "); }
-  // weiche Silbentrennung für deutsche Komposita (wirkt v.a. in Tabelle/PDF)
+function formatSkillLabel(key){
+  const lbl = SKILL_LABELS[key] || key.replaceAll("_"," ");
+  return softHyphenate(lbl); // weiche Trennung für Tabelle/PDF
+}
+function percent(n,d){ return d? Math.round((n/d)*100) : 0; }
+
+/* ===== DOM ===== */
+const introEl=document.getElementById("intro"), breakEl=document.getElementById("break"), quizEl=document.getElementById("quiz"), resEl=document.getElementById("results");
+const qTextEl=document.getElementById("qText"), optionsEl=document.getElementById("options"), progressText=document.getElementById("progressText"), pbar=document.getElementById("pbar");
+const errEl=document.getElementById("error"), prevBtn=document.getElementById("prevBtn"), nextBtn=document.getElementById("nextBtn");
+const breakNextBtn=document.getElementById("breakNextBtn"), copyBtn=document.getElementById("copyBtn"), resetBtn=document.getElementById("resetBtn"), pdfBtn=document.getElementById("pdfBtn");
+const estTime=document.getElementById("estTime"), countScenarios=document.getElementById("countScenarios"), skipToResults=document.getElementById("skipToResults");
+
+let state = loadState();
+
+function show(el){ el.classList.remove("hidden"); }
+function hide(el){ el.classList.add("hidden"); }
+
+/* ===== Hilfsfunktionen für Lesbarkeit ===== */
+// weiche Silbentrennung für lange deutsche Komposita (wirkt in Tabelle/PDF)
 function softHyphenate(str){
   const SHY = "\u00AD"; // &shy;
   return str
@@ -306,16 +325,13 @@ function softHyphenate(str){
     .replace(/Cybersicherheit/g, "Cyber"+SHY+"sicherheit")
     .replace(/Nutzerzentriertes/g, "Nutzer"+SHY+"zentriertes")
     .replace(/Robotikentwicklung/g, "Robotik"+SHY+"entwicklung")
-    .replace(/KI-gestütztes/g, "KI-gestütztes")
     .replace(/KI-Datenkompetenz/g, "KI-Daten"+SHY+"kompetenz")
     .replace(/Weltoffenheit/g, "Welt"+SHY+"offenheit");
 }
 
-// bricht lange Sunburst-Labels in 2 Zeilen (fügt <br> ein)
+// bricht lange Sunburst-Labels in 2 Zeilen (nur Anzeige; Struktur bleibt roh)
 function wrapForSunburst(label){
   const clean = label.replace(/\s+/g," ").trim();
-
-  // bevorzugte Bruchstellen rund um „ & “, „ / “, „-“ usw.
   const preferred = [" & ", " - ", " / "];
   for (const sep of preferred){
     const i = clean.indexOf(sep);
@@ -323,7 +339,6 @@ function wrapForSunburst(label){
       return clean.slice(0, i).trim() + "<br>" + clean.slice(i).trim();
     }
   }
-  // generisch: nach ~22 Zeichen am letzten Leerzeichen umbrechen
   const limit = 22;
   if (clean.length > limit){
     const cut = clean.lastIndexOf(" ", limit);
@@ -331,19 +346,6 @@ function wrapForSunburst(label){
   }
   return clean;
 }
-function percent(n,d){ return d? Math.round((n/d)*100) : 0; }
-
-/* ===== DOM ===== */
-const introEl=document.getElementById("intro"), breakEl=document.getElementById("break"), quizEl=document.getElementById("quiz"), resEl=document.getElementById("results");
-const qTextEl=document.getElementById("qText"), optionsEl=document.getElementById("options"), progressText=document.getElementById("progressText"), pbar=document.getElementById("pbar");
-const errEl=document.getElementById("error"), prevBtn=document.getElementById("prevBtn"), nextBtn=document.getElementById("nextBtn");
-const breakNextBtn=document.getElementById("breakNextBtn"), copyBtn=document.getElementById("copyBtn"), resetBtn=document.getElementById("resetBtn"), pdfBtn=document.getElementById("pdfBtn");
-const estTime=document.getElementById("estTime"), countScenarios=document.getElementById("countScenarios"), skipToResults=document.getElementById("skipToResults");
-
-let state = loadState();
-
-function show(el){ el.classList.remove("hidden"); }
-function hide(el){ el.classList.add("hidden"); }
 
 function updateProgress(){
   const total=SCENARIOS.length||1;
@@ -423,73 +425,10 @@ function goPrev(){
   }
 }
 
-/* ===== Farbschema für Sunburst ===== */
+/* ===== Farb-Utilities ===== */
 function getCssVar(name){
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
-
-function renderResults(){
-  hide(introEl); hide(quizEl); hide(breakEl); show(resEl);
-  try{ setBgFromIndex(SCENARIOS.length||0); }catch(e){}
-  const scores=state.scores;
-
-const labels=[], parents=[], values=[];
-Object.keys(CATEGORIES).forEach(cat=>{
-  const pretty = cat.replaceAll("_"," ");
-  const skills = CATEGORIES[cat];
-  const catSum = skills.reduce((sum,sk)=>sum+(scores[sk]||0),0);
-
-  // Kategorie-Label im Diagramm umbrechen
-  if(catSum>0){ labels.push(wrapForSunburst(pretty)); parents.push(""); values.push(catSum); }
-
-  // Skill-Label: in der Grafik umbrochen, in der Tabelle weich getrennt (kommt später)
-  skills.forEach(sk=>{
-    const v = scores[sk]||0;
-    if(v>0){
-      const chartLabel = wrapForSunburst(SKILL_LABELS[sk] || sk.replaceAll("_"," "));
-      labels.push(chartLabel);
-      parents.push(wrapForSunburst(pretty));
-      values.push(v);
-    }
-  });
-});
-  if(values.length===0){ labels.push("Keine Antworten"); parents.push(""); values.push(1); }
-
-const cTech    = getCssVar('--cat-tech')    || '#234B59';
-const cDigi    = getCssVar('--cat-digi')    || '#93B7BE';
-const cClassic = getCssVar('--cat-classic') || '#F5C396';
-const cTrans   = getCssVar('--cat-trans')   || '#78290F';
-
-const catColorMap = new Map([
-  ["Technologische Kompetenzen", cTech],
-  ["Digitale Schluesselkompetenzen", cDigi],
-  ["Klassische Kompetenzen", cClassic],
-  ["Transformative Kompetenzen", cTrans]
-  ]);
-
-  const colors = labels.map((lbl, i) => {
-    if (parents[i]==="") return catColorMap.get(lbl) || cPrimary; // Kategorien
-    const base = catColorMap.get(parents[i]) || cPrimary;         // Skills -> leichte Abstufung
-    return shadeColor(base, 0.12 * (i % 5));
-  });
-
-  Plotly.newPlot("chart", [{
-    type:"sunburst",
-    labels, parents, values, branchvalues:"total",
-    hovertemplate:"%{label}: %{value}<extra></extra>",
-    insidetextorientation:"radial",
-    marker:{ colors }
-  }], {
-    margin:{l:0,r:0,t:0,b:0},
-    paper_bgcolor:"rgba(0,0,0,0)",
-    plot_bgcolor:"rgba(0,0,0,0)"
-  }, {displayModeBar:false,responsive:true});
-
-  const tableWrap=document.getElementById("tableWrap");
-  const rows=Object.values(CATEGORIES).flat().map(sk=>`<tr><td>${formatSkillLabel(sk)}</td><td>${scores[sk]||0}</td></tr>`).join("");
-  tableWrap.innerHTML=`<table aria-describedby="res-h"><thead><tr><th>Skill</th><th>Punkte</th></tr></thead><tbody>${rows}</tbody></table>`;
-}
-
 function shadeColor(hex, t){
   const ctx = document.createElement('canvas').getContext('2d');
   ctx.fillStyle = hex;
@@ -522,6 +461,81 @@ function shadeColor(hex, t){
   return `rgb(${r2}, ${g2}, ${b2})`;
 }
 
+function renderResults(){
+  hide(introEl); hide(quizEl); hide(breakEl); show(resEl);
+  try{ setBgFromIndex(SCENARIOS.length||0); }catch(e){}
+  const scores=state.scores;
+
+  // Arrays für Plotly
+  const labels=[], parents=[], values=[], texts=[];
+
+  Object.keys(CATEGORIES).forEach(cat=>{
+    const pretty = cat.replaceAll("_"," ");
+    const skills=CATEGORIES[cat];
+    const catSum=skills.reduce((sum,sk)=>sum+(scores[sk]||0),0);
+
+    if(catSum>0){
+      labels.push(pretty);           // roh (Struktur)
+      parents.push("");              // root
+      values.push(catSum);
+      texts.push(wrapForSunburst(pretty)); // Anzeige
+    }
+
+    skills.forEach(sk=>{
+      const v=scores[sk]||0;
+      if(v>0){
+        const raw = SKILL_LABELS[sk] || sk.replaceAll("_"," ");
+        labels.push(raw);                // roh (Struktur)
+        parents.push(pretty);            // exakt wie Kategorie-Label
+        values.push(v);
+        texts.push(wrapForSunburst(raw));// Anzeige
+      }
+    });
+  });
+
+  if(values.length===0){
+    labels.push("Keine Antworten"); parents.push(""); values.push(1); texts.push("Keine Antworten");
+  }
+
+  // Farbzuordnung pro Kategorie
+  const cTech    = getCssVar('--cat-tech')    || '#234B59';
+  const cDigi    = getCssVar('--cat-digi')    || '#93B7BE';
+  const cClassic = getCssVar('--cat-classic') || '#F5C396';
+  const cTrans   = getCssVar('--cat-trans')   || '#78290F';
+
+  const catColorMap = new Map([
+    ["Technologische Kompetenzen", cTech],
+    ["Digitale Schluesselkompetenzen", cDigi],
+    ["Klassische Kompetenzen", cClassic],
+    ["Transformative Kompetenzen", cTrans]
+  ]);
+
+  const colors = labels.map((lbl, i) => {
+    if (parents[i]==="") return catColorMap.get(lbl) || cTech; // Kategorien
+    const base = catColorMap.get(parents[i]) || cTech;         // Skills -> leichte Abstufung
+    return shadeColor(base, 0.12 * (i % 5));
+  });
+
+  Plotly.newPlot("chart", [{
+    type:"sunburst",
+    labels, parents, values, branchvalues:"total",
+    text: texts, texttemplate: "%{text}",
+    hovertemplate:"%{label}: %{value}<extra></extra>",
+    insidetextorientation:"radial",
+    marker:{ colors }
+  }], {
+    margin:{l:0,r:0,t:0,b:0},
+    paper_bgcolor:"rgba(0,0,0,0)",
+    plot_bgcolor:"rgba(0,0,0,0)",
+    uniformtext:{ minsize:10, mode:"hide" }
+  }, {displayModeBar:false,responsive:true});
+
+  // Tabelle (barrierefrei)
+  const tableWrap=document.getElementById("tableWrap");
+  const rows=Object.values(CATEGORIES).flat().map(sk=>`<tr><td>${formatSkillLabel(sk)}</td><td>${scores[sk]||0}</td></tr>`).join("");
+  tableWrap.innerHTML=`<table aria-describedby="res-h"><thead><tr><th>Skill</th><th>Punkte</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
 /* Events */
 document.getElementById("startBtn").addEventListener("click",()=>{ hide(introEl); show(quizEl); if(countScenarios) countScenarios.textContent=SCENARIOS.length; renderQuestion(); });
 document.getElementById("skipToResults").addEventListener("click",()=>{ renderResults(); });
@@ -547,7 +561,7 @@ document.getElementById("copyBtn").addEventListener("click",()=>{
   if(countScenarios) countScenarios.textContent=total;
 })();
 
-// PDF Export (mit Hintergrundbild aus der Auswertung)
+/* ===== PDF Export (mit Auswertungs-Hintergrundbild) ===== */
 document.getElementById("pdfBtn").addEventListener("click", async ()=>{
   try{
     const BG_SRC = "IDW_201222_0902_1920.webp";
@@ -557,7 +571,6 @@ document.getElementById("pdfBtn").addEventListener("click", async ()=>{
     const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 40; let y = margin;
 
-    // Helpers --------------------------------------------------------------
     const loadImage = (src) => new Promise((res, rej) => {
       const img = new Image();
       img.crossOrigin = "anonymous";
@@ -566,38 +579,27 @@ document.getElementById("pdfBtn").addEventListener("click", async ()=>{
       img.src = src;
     });
 
-    // zeichnet img als "cover" auf ein Canvas mit globalAlpha
     const makeBackgroundDataURL = async (src, w, h, alpha=0.08) => {
       const img = await loadImage(src);
       const canvas = document.createElement("canvas");
       canvas.width = Math.floor(w);
       canvas.height = Math.floor(h);
       const ctx = canvas.getContext("2d");
-
-      // weißer Grund (für sauberes Blending im PDF)
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0,0,w,h);
-
-      // cover-Berechnung
+      ctx.fillStyle = "#ffffff"; ctx.fillRect(0,0,w,h);
       const scale = Math.max(w / img.width, h / img.height);
-      const dw = img.width * scale;
-      const dh = img.height * scale;
-      const dx = (w - dw) / 2;
-      const dy = (h - dh) / 2;
-
+      const dw = img.width * scale, dh = img.height * scale;
+      const dx = (w - dw) / 2, dy = (h - dh) / 2;
       ctx.globalAlpha = alpha;
       ctx.drawImage(img, dx, dy, dw, dh);
       ctx.globalAlpha = 1;
-
-      return canvas.toDataURL("image/png"); // sicheres Format für jsPDF
+      return canvas.toDataURL("image/png");
     };
-    // ---------------------------------------------------------------------
 
-    // 1) Hintergrundbild ganzseitig (dezent)
+    // Hintergrund auf Seite 1
     const bgDataUrl = await makeBackgroundDataURL(BG_SRC, pageWidth, pageHeight, 0.08);
     doc.addImage(bgDataUrl, "PNG", 0, 0, pageWidth, pageHeight, "", "FAST");
 
-    // 2) Kopf
+    // Kopf
     doc.setFont("helvetica","bold"); doc.setFontSize(14);
     doc.text("FutureSkills360° - Ausbilder:innen, Ausbildungspersonal und Personalverantwortliche", margin, y);
     y += 18;
@@ -605,7 +607,7 @@ document.getElementById("pdfBtn").addEventListener("click", async ()=>{
     doc.text(new Date().toLocaleString(), margin, y);
     y += 12;
 
-    // 3) Diagramm
+    // Diagramm
     const chartDiv = document.getElementById("chart");
     const chartPng = await Plotly.toImage(chartDiv, { format:"png", width: 900, height: 600 });
     const imgW = pageWidth - margin*2;
@@ -614,7 +616,7 @@ document.getElementById("pdfBtn").addEventListener("click", async ()=>{
     doc.addImage(chartPng, "PNG", margin, y, imgW, imgH, "", "FAST");
     y += imgH + 16;
 
-    // 4) Tabelle
+    // Tabelle (Silbentrennung wirkt, da html2canvas den Browser-Render übernimmt)
     const table = document.getElementById("tableWrap");
     const canvas = await html2canvas(table, { scale: 2, backgroundColor: null });
     const tablePng = canvas.toDataURL("image/png");
@@ -623,14 +625,13 @@ document.getElementById("pdfBtn").addEventListener("click", async ()=>{
 
     if (y + tH > pageHeight - margin) {
       doc.addPage();
-      // pro neue Seite ebenfalls den dezenten Hintergrund setzen
       const bg2 = await makeBackgroundDataURL(BG_SRC, pageWidth, pageHeight, 0.08);
       doc.addImage(bg2, "PNG", 0, 0, pageWidth, pageHeight, "", "FAST");
       y = margin;
     }
     doc.addImage(tablePng, "PNG", margin, y, tW, tH, "", "FAST");
 
-    // 5) Fußnote
+    // Fußnote
     doc.setFontSize(8);
     doc.text("Hinweis: Werte basieren auf Ihren Antworten in dieser Sitzung. Keine Speicherung personenbezogener Daten.", margin, pageHeight - margin/2);
 
@@ -643,8 +644,6 @@ document.getElementById("pdfBtn").addEventListener("click", async ()=>{
 /* ===== Keyboard Shortcuts ===== */
 document.addEventListener("keydown", (e) => {
   if (quizEl.classList.contains("hidden")) return; // nur im Quiz aktiv
-
-  // Zahlentasten 1-4 -> Option auswählen
   if (["1","2","3","4"].includes(e.key)) {
     const idx = parseInt(e.key, 10) - 1;
     const inputs = optionsEl.querySelectorAll("input[type=radio]");
@@ -654,18 +653,8 @@ document.addEventListener("keydown", (e) => {
       e.preventDefault();
     }
   }
-
-  // Enter -> Weiter
-  if (e.key === "Enter") {
-    e.preventDefault();
-    nextBtn.click();
-  }
-
-  // Backspace -> Zurück
-  if (e.key === "Backspace") {
-    e.preventDefault();
-    prevBtn.click();
-  }
+  if (e.key === "Enter") { e.preventDefault(); nextBtn.click(); }
+  if (e.key === "Backspace") { e.preventDefault(); prevBtn.click(); }
 });
 </script>
 </body>
